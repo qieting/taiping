@@ -25,6 +25,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     JButton change, huisu, jili, jilu, kehu, moudle,save;
     JButton export;
 
+
     HashMap<String, TemplateJpanel> jpanelHashMap;
     static List<String> titles;
     public static int limit = 4;
