@@ -17,4 +17,14 @@ public class CheckValue {
     public String toString(){
         return value.daima+value.mingzi;
     }
+
+    public boolean equals(Object o){
+        if(o==null)
+            return false;
+        if(o instanceof  CheckValue){
+            CheckValue checkValue =(CheckValue)o;
+            return  checkValue.value.equals(this.value);
+        }
+        return false;
+    }
 }

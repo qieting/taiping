@@ -12,7 +12,6 @@ public class Chioce {
         this.mingzi=mingzi;
 
     }
-
     @Override
     public String toString(){
         return  daima+mingzi;

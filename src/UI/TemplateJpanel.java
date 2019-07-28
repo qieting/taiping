@@ -20,8 +20,6 @@ import java.util.List;
 public class TemplateJpanel extends JPanel {
 
 
-
-
     Mytype mytype;
     JTextField title, guize, must;
     JComponent chioce;
@@ -34,14 +32,16 @@ public class TemplateJpanel extends JPanel {
         title = new JTextField(mytype.title);
         guize = new JTextField("");
         must = new JTextField("*");
-        chioce = getChioce(mytype);
+        chioce = initChioce(mytype);
         title.setBackground(Color.WHITE);
 
         //设置大小
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double w = screenSize.width * 0.4 - 25;
         must.setSize(20, 40);
-        title.setSize(150, 40);
-        chioce.setSize(200, 40);
-        guize.setSize(300, 40);
+        title.setSize((int) (w * 0.25), 40);
+        chioce.setSize((int) (w * 0.35), 40);
+        guize.setSize((int) (w * 0.8), 40);
         //是否可编辑
         must.setEnabled(false);
         title.setEnabled(false);
@@ -93,6 +93,7 @@ public class TemplateJpanel extends JPanel {
                 for (int i = 0; i < chioces.size(); i++) {
                     if (chioces.get(i).daima.equals(ss)) {
                         comboBox.setSelectedIndex(i);
+                        guize.setText(chioces.get(i).mingzi);
                         return;
                     }
                 }
@@ -102,22 +103,25 @@ public class TemplateJpanel extends JPanel {
             case shuang:
 
                 MyComboBox jcomboBox = (MyComboBox) chioce;
-                List<CheckValue> checkValues = jcomboBox.checkValues;
+                ComboBoxModel <CheckValue> checkValues = jcomboBox.getModel();
                 String q[] = ss.split(",");
-                for (CheckValue checkValue : checkValues) {
+                for(int i =0 ;i<checkValues.getSize();i++){
+                    CheckValue checkValue =checkValues.getElementAt(i);
                     checkValue.bolValue = false;
                     for (String ssss : q) {
-                        if (checkValue.value.mingzi.equals(ssss)) {
+                        if (checkValue.value.daima.equals(ssss)) {
                             checkValue.bolValue = true;
                         }
                     }
                 }
+                guize.setText(jcomboBox.getComboVc());
+
 
 
         }
     }
 
-    public JComponent getChioce(Mytype mytype) {
+    public JComponent initChioce(Mytype mytype) {
         JComboBox comboBox;
         switch (mytype.type) {
             case string:
@@ -144,44 +148,51 @@ public class TemplateJpanel extends JPanel {
                 break;
             case dan:
                 chioce = new MComboBox();
-                List<Chioce> chioces = mytype.chioces;
-                System.out.println(mytype.title);
                 comboBox = (JComboBox) chioce;
-                for (Chioce chioce : chioces) {
-                    comboBox.addItem(chioce);
-                }
                 String q = mytype.chioces.get(0).mingzi;
-//                        comboBox
                 guize.setText(q);
                 ((JComboBox) chioce).addItemListener(new ItemListener() {
                     @Override
                     public void itemStateChanged(ItemEvent e) {
                         try {
                             String q = ((Chioce) e.getItem()).mingzi;
-//                        comboBox
                             guize.setText(q);
                         } catch (ArrayIndexOutOfBoundsException ee) {
                             System.out.println(mytype.title + "发生数组错误，疑似删除");
                         }
                     }
                 });
+                if (mytype.title.equals("渠道小类")) {
+                    comboBox.removeAllItems();
+                    comboBox.addItem(new Chioce("", ""));
+                    comboBox.addItem(new Chioce("02030100", "个人代码"));
+
+                } else {
+                    List<Chioce> chioces = mytype.chioces;
+                    for (Chioce chioce : chioces) {
+                        comboBox.addItem(chioce);
+                    }
+                }
+
                 break;
 
             case shuang:
+                List<Chioce> chioces = mytype.chioces;
                 chioce = new MyComboBox(guize, mytype.must);
                 comboBox = (MyComboBox) chioce;
                 chioces = mytype.chioces;
-                if (mytype.title.equals("渠道小类")) {
-
-                    CheckValue checkValue = new CheckValue();
-                    checkValue.bolValue = false;
-                    checkValue.value = new Chioce("", "");
-                    comboBox.addItem(checkValue);
-                    checkValue = new CheckValue();
-                    checkValue.bolValue = false;
-                    checkValue.value = new Chioce("02030100", "个人代码");
-                    comboBox.addItem(checkValue);
-                } else if (mytype.title.equals("车辆种类")) {
+//                if (mytype.title.equals("渠道小类")) {
+//
+//                    CheckValue checkValue = new CheckValue();
+//                    checkValue.bolValue = false;
+//                    checkValue.value = new Chioce("", "");
+//                    comboBox.addItem(checkValue);
+//                    checkValue = new CheckValue();
+//                    checkValue.bolValue = false;
+//                    checkValue.value = new Chioce("02030100", "个人代码");
+//                    comboBox.addItem(checkValue);
+//                } else
+                if (mytype.title.equals("车辆种类")) {
                     CheckValue checkValue = new CheckValue();
                     checkValue.bolValue = false;
                     checkValue.value = new Chioce("", "");
@@ -194,11 +205,7 @@ public class TemplateJpanel extends JPanel {
                         comboBox.addItem(checkValue);
                     }
                 }
-                comboBox.setRenderer(new CheckListCellRenderer());
-
-//                if (!mytype.must) {
-//                    comboBox.setSelectedIndex(0);
-//                }
+                comboBox.setRenderer(new CheckListCellRenderer((MyComboBox)comboBox));
                 break;
         }
         return chioce;
@@ -206,7 +213,6 @@ public class TemplateJpanel extends JPanel {
     }
 
     public String getContent() {
-
         String s = null;
         switch (mytype.type) {
             case string:
@@ -214,19 +220,21 @@ public class TemplateJpanel extends JPanel {
             case intt:
                 s = ((JTextField) chioce).getText();
                 if (!mytype.changevalidation(s))
-                    throw new ArrayIndexOutOfBoundsException(s);
+                    return null;
                 break;
             case dan:
-
-                List<Chioce> chioces = mytype.chioces;
-                JComboBox comboBox;
-                comboBox = (JComboBox) chioce;
                 s = (((Chioce) ((JComboBox) chioce).getModel().getSelectedItem()).daima);
+                if (mytype.must && s.length() == 0) {
+                    return null;
+                }
                 break;
             case shuang:
 
                 MyComboBox jcomboBox = (MyComboBox) chioce;
-                s = jcomboBox.getComboVc();
+                s = jcomboBox.getComboid();
+                if (mytype.must && s.length() == 0) {
+                    return null;
+                }
                 break;
         }
         return s == null ? "" : s;

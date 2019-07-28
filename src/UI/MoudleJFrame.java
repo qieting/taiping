@@ -4,6 +4,7 @@ import UI.MyComboBox.CheckValue;
 import UI.MyComboBox.MyComboBox;
 import util.ExcleUtil;
 import Type.*;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -15,42 +16,51 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import java.util.Vector;
 
 public class MoudleJFrame extends JFrame implements ActionListener {
 
-    JButton quert,select;
-    JTextField index;
+    JButton quert, select;
     JTable table;
     JTextField jTextField;
     HashMap<String, TemplateJpanel> jpanelHashMap;
+
     DefaultTableModel model;
     TemplateJFrame templateJFrame;
+    List<Modify> modifyList;
+    UI.TemplateJFrame.Type type;
 
-    public MoudleJFrame(TemplateJFrame t) {
+    public MoudleJFrame(TemplateJFrame t, TemplateJFrame.Type type) {
         super();
+        this.type = type;
         this.setLayout(new MyVFlowLayout());
         this.setTitle("模板");
-        templateJFrame=t;
+        templateJFrame = t;
         JPanel topJPanel = new JPanel();
-        int height=(int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         quert = new JButton("查询");
-        select =new JButton("选择");
-        jTextField =new JTextField("           查询模式下什么都不选代表所有都可以，忽略必选标识");
-        jTextField.setBorder(new EmptyBorder(0,0,0,0));
+        select = new JButton("选择");
+        jTextField = new JTextField("查询模式下什么都不选代表所有都可以，忽略必选标识");
+        jTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
         jTextField.setEnabled(false);
         jTextField.setDisabledTextColor(Color.red);
-        index=new JTextField("1       ");
+        topJPanel.add(quert);
+        topJPanel.add(select);
         quert.addActionListener(this);
         select.addActionListener(this);
+        JButton delete = new JButton("删除");
+        delete.addActionListener(this::actionPerformed);
+        topJPanel.add(delete);
+        JButton change = new JButton("修改");
+        change.addActionListener(this);
+        topJPanel.add(change);
 
 
-        topJPanel.add(quert);
-        topJPanel.add(index);
-        topJPanel.add(select);
         topJPanel.add(jTextField);
 
         this.add(topJPanel);
+
+
         JScrollPane jScrollPane = new JScrollPane();
         this.add(jScrollPane);
         JPanel jPanel = new JPanel();
@@ -94,23 +104,25 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
-                                    chioceList.add(checkValue);
+                                    if(!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
+                                        chioceList.add(checkValue);
+                                    }
                                     break;
                                 case "04":
                                 case "10":
@@ -199,7 +211,135 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
                     @Override
                     public void removeUpdate(DocumentEvent e) {
+                        MyComboBox comboBox = (MyComboBox) jpanelHashMap.get("车辆种类").chioce;
+                        comboBox.removeAllItems();
+                        comboBox.addItem(new CheckValue(false, new Chioce("", "")));
+                        String s = templateJpanel.guize.getText();
+                        System.out.println("车辆种类代码为" + s);
+                        String[] daimas = s.split(",");
 
+                        List<Chioce> chioces = types.get("车辆用途").chioces;
+
+                        List<String> text = new ArrayList<>();
+                        for (String daima : daimas) {
+                            for (Chioce chioce : chioces) {
+                                if (chioce.mingzi.equals(daima)) {
+                                    text.add(chioce.daima);
+                                    break;
+                                }
+                            }
+                        }
+                        List<CheckValue> chioceList = new ArrayList<>();
+                        for (String m : text) {
+                            CheckValue checkValue;
+                            switch (m) {
+                                case "01":
+                                case "02":
+                                case "03":
+                                    checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
+                                    if(!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
+                                        chioceList.add(checkValue);
+                                    }
+                                    break;
+                                case "04":
+                                case "10":
+                                    checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
+                                    if (!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
+                                        chioceList.add(checkValue);
+                                    }
+                                    break;
+                                case "05":
+                                    checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
+                                    if (!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
+                                        chioceList.add(checkValue);
+                                    }
+
+                                    checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
+                                    if (!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
+                                        chioceList.add(checkValue);
+                                    }
+                                    break;
+                                case "06":
+                                case "07":
+                                    checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
+                                    if (!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
+                                        chioceList.add(checkValue);
+                                    }
+                                    break;
+                                case "08":
+                                    checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
+                                    if (!chioceList.contains(checkValue)) {
+
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
+
+                                    }
+                                    break;
+                                case "09":
+                                    checkValue = new CheckValue(false, new Chioce("25", "2吨以下挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("26", "2-5吨挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("27", "5-10吨挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("28", "210吨以上挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("30", "特种车一"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("31", "特种车二"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("40", "特种车三"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("41", "特种车四"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("42", "特种车一挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("50", "特种车二挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("51", "冷藏保温挂车"));
+                                    chioceList.add(checkValue);
+                                    checkValue = new CheckValue(false, new Chioce("60", "特种车三挂车"));
+                                    chioceList.add(checkValue);
+                                    break;
+
+                            }
+
+                        }
+                        for (CheckValue checkValue : chioceList) {
+                            comboBox.addItem(checkValue);
+                        }
                     }
 
                     @Override
@@ -209,11 +349,12 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                 });
             }
             jpanelHashMap.put(mytype.title, templateJpanel);
+
             jPanel.add(templateJpanel);
         }
 
-
-        jScrollPane.setPreferredSize(new Dimension(700, (int)(height*0.35)));
+        int height = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+        jScrollPane.setPreferredSize(new Dimension(700, (int) (height * 0.35)));
 
         JScrollBar Bar = null;
 
@@ -221,18 +362,72 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
         Bar.setUnitIncrement(40);
 
+
+        JScrollPane jScrollPane1 = new JScrollPane();
+        jScrollPane1.setPreferredSize(new Dimension(700, 70));
+        jScrollPane1.setSize(700, 70);
+        jScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JPanel jj = new JPanel();
+
+        jj.setLayout(new FlowLayout());
+        jj.setSize(2000, 60);
+        modifyList = new ArrayList<>();
+
+        switch (type) {
+            case JILU:
+                modifyList.add(new Modify("记录费用(率)"));
+                modifyList.add(new Modify("记录费用(额)"));
+                break;
+            case KEHU:
+                modifyList.add(new Modify("客户评分"));
+                break;
+            case HUISU:
+                modifyList.add(new Modify("预估引流成本率"));
+                modifyList.add(new Modify("预估业务维护成本率"));
+                modifyList.add(new Modify("预估增值服务费成本率"));
+                modifyList.add(new Modify("预估间接理赔成本率"));
+                modifyList.add(new Modify("预估增值服务费成本率2"));
+                break;
+            case CHANGE:
+                modifyList.add(new Modify("销售及服务成本"));
+                modifyList.add(new Modify("可用变动费用率"));
+                modifyList.add(new Modify("可用变动费用额"));
+                modifyList.add(new Modify("代理手续费率"));
+                modifyList.add(new Modify("月度提奖率"));
+                modifyList.add(new Modify("可联动费用率"));
+                modifyList.add(new Modify("组织利益（分）"));
+                modifyList.add(new Modify("组织利益（总）"));
+                modifyList.add(new Modify("保单服务费"));
+                modifyList.add(new Modify("固定绩效"));
+                break;
+            case JILI:
+                modifyList.add(new Modify("激励费率1"));
+                modifyList.add(new Modify("激励费额1"));
+                modifyList.add(new Modify("激励费率2"));
+                modifyList.add(new Modify("激励费额2"));
+                break;
+            case ALL:
+                break;
+        }
+        for (Modify modify : modifyList) {
+            jj.add(modify);
+        }
+        jScrollPane1.setViewportView(jj);
+
+        this.add(jScrollPane1);
+
         JScrollPane jScrolltable = new JScrollPane();
         this.add(jScrolltable);
-        jScrolltable.setPreferredSize(new Dimension(200, (int)(height*0.30)));
+        jScrolltable.setPreferredSize(new Dimension(200, (int) (height * 0.30)));
         JPanel tablepanle = new JPanel();
         tablepanle.setLayout(new MyVFlowLayout());
         jScrolltable.setViewportView(tablepanle);
-        table =new JTable();
-         model = new DefaultTableModel();
+        table = new JTable();
+        model = new DefaultTableModel();
 
         table.setModel(model);
         model.addColumn("序号");
-        for(String s :TemplateJFrame.getTypes()){
+        for (String s : templateJFrame.typesselected) {
             model.addColumn(s);
         }
         tablepanle.add(table.getTableHeader());
@@ -241,11 +436,11 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
         this.setBackground(Color.WHITE);
 
-        this.setBounds(200, 100, 700, (int)(height*0.8));
+        this.setBounds(200, 100, 700, (int) (height * 0.8));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(getOwner());
 
-       this.pack();
+        this.pack();
 
         this.setVisible(true);
         this.refresh();
@@ -271,15 +466,15 @@ public class MoudleJFrame extends JFrame implements ActionListener {
         return titles;
     }
 
-    public void refresh(){
+    public void refresh() {
 
         //字体会变大  com.sun.java.swing.plaf.windows.WindowsLookAndFeel
-        String lookAndFeel =UIManager.getSystemLookAndFeelClassName();
+        String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
         try {
-            javax.swing. UIManager.setLookAndFeel(lookAndFeel);
-            List<String> types =getTypes();
-            for(String s :types){
-                TemplateJpanel templateJpanel =jpanelHashMap.get(s);
+            javax.swing.UIManager.setLookAndFeel(lookAndFeel);
+            List<String> types = getTypes();
+            for (String s : types) {
+                TemplateJpanel templateJpanel = jpanelHashMap.get(s);
                 SwingUtilities.updateComponentTreeUI(templateJpanel.title);
                 SwingUtilities.updateComponentTreeUI(templateJpanel.guize);
                 SwingUtilities.updateComponentTreeUI(templateJpanel.must);
@@ -298,9 +493,20 @@ public class MoudleJFrame extends JFrame implements ActionListener {
         }
 
     }
+
     public static void main(String args[]) {
 
-       MoudleJFrame templateJFrame = new MoudleJFrame(null);
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    MoudleJFrame templateJFrame = new MoudleJFrame(null, TemplateJFrame.Type.CHANGE);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
 
     }
 
@@ -312,34 +518,58 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
         switch (string) {
             case "查询":
-                index.setText("1");
                 List<String> titles = getTypes();
-                HashMap<Integer,String> map =new HashMap<>();
-                int  sele []={0,1,2,36,33,34,37,7,8,59,60};
+                HashMap<Integer, String> map = new HashMap<>();
+                int sele[] = null;
+                switch (type) {
+                    case JILI:
+                        int q[] = {0, 1, 2, 14, 11, 12, 15, 19, 40, 38, 39};
+                        sele = q;
+                        break;
+                    case CHANGE:
+                        int sesle[] = {0, 1, 2, 22, 19, 20, 23, 26, 48, 46, 47};
+                        sele = sesle;
+
+                        break;
+                    case HUISU:
+                        int saele[] = {0, 1, 2, 15, 12, 13, 16, 19, 41, 39, 40};
+                        sele = saele;
+                        break;
+                    case KEHU:
+                        int selae[] = {0, 1, 2, 11, 8, 9, 12, 15, 37, 35, 36};
+                        sele = selae;
+                        break;
+                    case JILU:
+                        int qq[] = {0, 1, 2, 12, 9, 10, 13, 17, 39, 37, 38};
+                        sele = qq;
+                        break;
+
+
+                }
                 for (int i = 0; i < titles.size(); i++) {
-                    try {
-                        String s =jpanelHashMap.get(titles.get(i)).getContent();
-                        if(s.startsWith(",")){
-                            s=s.replaceFirst(",","");
-                        }
-                        map.put(sele[i],""+s);
-                    } catch (ArrayIndexOutOfBoundsException ea) {
-                        map.put(sele[i],""+ea.getMessage());
+
+                    String s = jpanelHashMap.get(titles.get(i)).getContent();
+                    if (s == null) {
+                        JOptionPane.showMessageDialog(null, "属性出错：" + jpanelHashMap.get(titles.get(i)).mytype.title, "属性错误", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    } else {
+                        if (!s.equals(""))
+                            map.put(sele[i] + 1, "" + s);
                     }
+
                 }
 
 
                 try {
-                    List<Vector> vectors=ExcleUtil.query("all.xls",0,map);
+                    List<Vector> vectors = ExcleUtil.query(type, map);
 
-                    JOptionPane.showConfirmDialog(null, "查询到"+vectors.size(),"" ,JOptionPane.CLOSED_OPTION);
+                    JOptionPane.showConfirmDialog(null, "查询到" + vectors.size(), "", JOptionPane.CLOSED_OPTION);
 
-                        model.setRowCount(0);
+                    model.setRowCount(0);
 
-;
-                    for (int i=0 ;i<vectors.size();i++){
-                        Vector vector =vectors.get(i);
-                        vector.add(0,i);
+                    ;
+                    for (int i = 0; i < vectors.size(); i++) {
+                        Vector vector = vectors.get(i);
                         model.addRow(vector);
                     }
 
@@ -348,38 +578,124 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                 }
                 return;
             case "选择":
-                String s =index.getText()+"";
-                if(s.equals("")){
-                    showError("请输入要选择的行数");
-                }else {
-                    try {
-                        int  q =Integer.parseInt(s.trim());
-                        if(q>=table.getRowCount()){
-                            showError("请输入正确的行数");
-                        }
-                        List<String> strings =new ArrayList<>();
-                        for(int i =1 ;i<=104 ;i++){
-                            strings.add(""+model.getValueAt(q,i));
-                        }
-                        templateJFrame.setValue(strings);
-
-                        this.setVisible(false);
-
-
-                    }catch (Exception  ee){
-                        showError("输入错误"+ee.getMessage());
-
-                    }
-
-
-                }
+                selected();
+                break;
+            case "删除":
+                delete();
+                break;
+            case "修改":
+                change();
                 break;
         }
 //第一步
 
     }
 
-    public  void  showError(String s){
-        JOptionPane.showMessageDialog(null, s, "错误", JOptionPane.ERROR_MESSAGE);
+    public void change() {
+        int[] selectedRows = table.getSelectedRows();
+        int lenth = selectedRows.length;
+        if (lenth == 0) {
+            JOptionPane.showConfirmDialog(MoudleJFrame.this, "需要先选择要删除的行哦", "提示框",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int result = JOptionPane.showConfirmDialog(MoudleJFrame.this, "确定要修改选中的" + selectedRows.length + "行吗", "提示框",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+
+        } else {
+            return;
+        }
+
+
+        int select[] = new int[lenth];
+        for (int i = 0; i < lenth; i++) {
+
+            int qq = Integer.parseInt(((String) table.getValueAt(selectedRows[i], 0)).split("#")[1]);
+            select[i] = qq;
+
+        }
+        HashMap<Integer, String> map = new HashMap<>();
+        int ioiii = 6;
+        for (Modify modify : modifyList) {
+            if (modify.getValue().length() > 0) {
+                map.put(ioiii, modify.getValue().trim());
+            }
+            ioiii++;
+        }
+        try {
+            ExcleUtil.change(type, select, map);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        JOptionPane.showConfirmDialog(MoudleJFrame.this, "修改成功", "提示框",
+                JOptionPane.CLOSED_OPTION);
+
+    }
+
+    public void showError(String s) {
+        JOptionPane.showMessageDialog(null, s, "修改成功", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void selected() {
+        int[] selectedRows = table.getSelectedRows();
+        int lenth = selectedRows.length;
+        int result = JOptionPane.showConfirmDialog(MoudleJFrame.this, "确定要返回选中的" + selectedRows.length + "行吗", "提示框",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+
+        } else {
+            return;
+        }
+
+
+        List<Vector> vectorList = new ArrayList<>();
+        Vector vector = model.getDataVector();
+        for (int i = 0; i < lenth; i++) {
+            vectorList.add((Vector) vector.get(i));
+        }
+
+        templateJFrame.setValue(vectorList);
+        templateJFrame.setVisible(true);
+        this.setVisible(false);
+        this.dispose();
+    }
+
+
+    public void delete() {
+        int[] selectedRows = table.getSelectedRows();
+        int lenth = selectedRows.length;
+        if (lenth == 0) {
+            JOptionPane.showConfirmDialog(MoudleJFrame.this, "没有选择任何选项", "提示框",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int result = JOptionPane.showConfirmDialog(MoudleJFrame.this, "确定要删除选中的" + selectedRows.length + "行吗", "提示框",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+
+        } else {
+            return;
+        }
+
+
+        int select[] = new int[lenth];
+        for (int i = lenth-1; i >=0; i--) {
+
+            int qq = Integer.parseInt(((String) table.getValueAt(selectedRows[i], 0)).split("#")[1]);
+            System.out.println(selectedRows[i] + "选中获得" + qq);
+            select[i] = qq;
+            model.removeRow(selectedRows[i]);
+        }
+
+        try {
+            ExcleUtil.delete(type, select);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        JOptionPane.showConfirmDialog(MoudleJFrame.this, "删除成功", "提示框",
+                JOptionPane.CLOSED_OPTION);
     }
 }

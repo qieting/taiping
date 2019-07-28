@@ -283,7 +283,7 @@ public class TypeMannger {
         chioces.add(new Chioce("0101", "团队渠道"));
         chioces.add(new Chioce("0201", "经代"));
         chioces.add(new Chioce("2206", "中石化渠道"));
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.shuang).setChioces(chioces).setMust(true).setTitle("渠道类型").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(true).setTitle("渠道类型").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -384,7 +384,7 @@ public class TypeMannger {
         chioces.add(new Chioce("22010602", "中石化（财险）"));
         chioces.add(new Chioce("22010701", "电子商务（寿险）"));
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.shuang).setChioces(chioces).setMust(false).setTitle("渠道小类").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("渠道小类").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -407,7 +407,7 @@ public class TypeMannger {
         chioces = new ArrayList<>();
         chioces.add(new Chioce("1359", "机动车综合险"));
         chioces.add(new Chioce("0000", "PUB"));
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.shuang).setChioces(chioces).setMust(false).setTitle("产品组合").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("产品组合").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -695,7 +695,7 @@ public class TypeMannger {
         chioces.add(new Chioce("02", "非营运"));
         chioces.add(new Chioce("01", "营运"));
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.shuang).setChioces(chioces).setMust(false).setTitle("使用性质").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("使用性质").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -823,7 +823,7 @@ public class TypeMannger {
         mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setMOren("0").setTitle("新车购置价").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return Pattern.matches("\\d|[123456789]//d{1,6}|10000000", (String) text);
+                return Pattern.matches("\\d+?-\\d+?", (String) text);
 
             }
         }).build();

@@ -10,6 +10,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class MoudleJpanel extends TemplateJpanel {
@@ -18,53 +21,54 @@ public class MoudleJpanel extends TemplateJpanel {
         super(mytype);
     }
 
-    public JComponent getChioce(Mytype mytype) {
+    @Override
+    public JComponent initChioce(Mytype mytype) {
         JComboBox comboBox;
         switch (mytype.type) {
             case Date:
-                chioce = new JTextField(mytype.getDefault());
-                chioce.addFocusListener(new FocusListener() {
-                                            @Override
-                                            public void focusGained(FocusEvent e) {
-                                            }
-
-                                            @Override
-                                            public void focusLost(FocusEvent e) {
-                                                String text;
-                                                text = ((JTextField) chioce).getText();
-                                                if (!mytype.changevalidation(text)) {
-                                                    title.setBackground(Color.RED);
-                                                } else {
-                                                    title.setBackground(Color.WHITE);
-                                                }
-
-
-                                            }
-                                        }
-                );
-                break;
             case string:
             case intt:
                 chioce = new JTextField();
-                chioce.addFocusListener(new FocusListener() {
-                                            @Override
-                                            public void focusGained(FocusEvent e) {
-                                            }
+//                chioce.addFocusListener(new FocusListener() {
+//                                            @Override
+//                                            public void focusGained(FocusEvent e) {
+//                                            }
+//
+//                                            @Override
+//                                            public void focusLost(FocusEvent e) {
+//                                                String text;
+//                                                text = ((JTextField) chioce).getText();
+//                                                if (!mytype.changevalidation(text)) {
+//                                                    title.setBackground(Color.RED);
+//                                                } else {
+//                                                    title.setBackground(Color.WHITE);
+//                                                }
+//
+//
+//                                            }
+//                                        }
+//                );
 
-                                            @Override
-                                            public void focusLost(FocusEvent e) {
-                                                String text;
-                                                text = ((JTextField) chioce).getText();
-                                                if (!mytype.changevalidation(text)) {
-                                                    title.setBackground(Color.RED);
-                                                } else {
-                                                    title.setBackground(Color.WHITE);
-                                                }
-
-
-                                            }
-                                        }
-                );
+//                chioce = new JTextField();
+//                chioce.addFocusListener(new FocusListener() {
+//                                            @Override
+//                                            public void focusGained(FocusEvent e) {
+//                                            }
+//
+//                                            @Override
+//                                            public void focusLost(FocusEvent e) {
+//                                                String text;
+//                                                text = ((JTextField) chioce).getText();
+//                                                if (!mytype.changevalidation(text)) {
+//                                                    title.setBackground(Color.RED);
+//                                                } else {
+//                                                    title.setBackground(Color.WHITE);
+//                                                }
+//
+//
+//                                            }
+//                                        }
+//                );
                 break;
             case dan:
                 chioce = new MComboBox();
@@ -114,7 +118,7 @@ public class MoudleJpanel extends TemplateJpanel {
                         checkValue.bolValue = false;
                         comboBox.addItem(checkValue);
                     }
-                comboBox.setRenderer(new CheckListCellRenderer());
+                comboBox.setRenderer(new CheckListCellRenderer((MyComboBox)comboBox));
 
 //                if (!mytype.must) {
 //                    comboBox.setSelectedIndex(0);
@@ -125,20 +129,32 @@ public class MoudleJpanel extends TemplateJpanel {
 
     }
 
+    static boolean validDate(String s) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setLenient(false);
+        try {
+            Date date = sdf.parse(s);
+        } catch (ParseException e) {
+            return false;
+        }
+        return true;
+    }
     public String getContent() {
 
         String s = null;
         switch (mytype.type) {
-            case string:
             case Date:
+                s = ((JTextField) chioce).getText();
+                if (!s.equals("")&&!validDate(s))
+                    return  null;
+                break;
+            case string:
             case intt:
                 s = ((JTextField) chioce).getText();
-                if (!mytype.changevalidation(s))
-                    throw new ArrayIndexOutOfBoundsException(s);
+                if (!s.equals("")&&!mytype.changevalidation(s))
+                    return  null;
                 break;
             case dan:
-
-
                 List<Chioce> chioces = mytype.chioces;
                 JComboBox comboBox;
                 comboBox = (JComboBox) chioce;
@@ -148,7 +164,7 @@ public class MoudleJpanel extends TemplateJpanel {
             case shuang:
 
                 MyComboBox jcomboBox = (MyComboBox) chioce;
-                s = jcomboBox.getComboVc();
+                s = jcomboBox.getComboid();
                 break;
         }
         return s == null ? "" : s;

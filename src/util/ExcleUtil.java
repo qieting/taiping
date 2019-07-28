@@ -1,11 +1,16 @@
 package util;
 
 import Type.TypeMannger;
+import UI.MoudleJFrame;
 import UI.TemplateJFrame;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.text.EditorKit;
+import javax.xml.bind.ValidationException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,63 +27,91 @@ public class ExcleUtil {
         return sheet;
     }
 
-    public static List<Vector> query(String path, int sheetname, HashMap<Integer, String> values) throws IOException {
+    public static List<Vector> query(TemplateJFrame.Type type, HashMap<Integer, String> values) throws IOException {
 
-        File excelFile = new File(path); // 创建文件对象
+        File excelFile = new File(type + ".xls"); // 创建文件对象
         FileInputStream in = new FileInputStream(excelFile); // 文件流
         HSSFWorkbook workbook = new HSSFWorkbook(in);
         //创建返回对象，把每行中的值作为一个数组，所有行作为一个集合返回
         List<Vector> list = new ArrayList<Vector>();
         if (workbook != null) {
 
-            Sheet sheet = workbook.getSheetAt(sheetname);
+            Sheet sheet = workbook.getSheetAt(0);
             if (sheet == null) {
                 return list;
             }
-            //获得当前sheet的开始行
-            int firstRowNum = sheet.getFirstRowNum();
+
             //获得当前sheet的结束行
             int lastRowNum = sheet.getLastRowNum();
-            //循环除了第一行的所有行
-
-            for (int rowNum = firstRowNum + 1; rowNum <= lastRowNum; rowNum++) {
+            System.out.println(lastRowNum);
+            int lastCellNum = TemplateJFrame.getTypes().size();
+            String that = null;
+            for (int rowNum = lastRowNum; rowNum >= 1; rowNum--) {
                 //获得当前行
                 Row row = sheet.getRow(rowNum);
-                if (row == null) {
-                    continue;
+                Cell cell = row.getCell(0);
+                if (cell != null) {
+                    String code = cell.getStringCellValue();
+                    if (that != null && !code.startsWith(that)) {
+                        break;
+                    }
+                    if(code.endsWith("#")){
+                        continue;
+                    }
+                } else {
+                    break;
                 }
-                //获得当前行的开始列
-                int firstCellNum = row.getFirstCellNum();
-                //获得当前行的列数
-                int lastCellNum = TemplateJFrame.getTypes().size();
-                Vector cells = new Vector();
-                //循环当前行
-                int cellNum = 0;
-                for (cellNum = firstCellNum; cellNum < lastCellNum; ) {
-                    Cell cell = row.getCell(cellNum);
-                    String ce = String.valueOf(cell.getStringCellValue());
-                    if (values.get(cellNum) != null) {
-                        System.out.println(TemplateJFrame.getTypes().get(cellNum));
-                        String q = values.get(cellNum).trim();
-                        System.out.println(ce+"+"+q);
-                        if (q .equals( "" )|| ce.equals(q)) {
 
-                            cells.add(String.valueOf(cell.getStringCellValue()));
+                boolean ch=true;
+                for (int key : values.keySet()) {
+                    cell = row.getCell(key);
+                    if (cell == null)
+                        continue;
+                    String ce = cell.getStringCellValue();
+                    if (values.get(key) != null) {
+                        String q = values.get(key).trim();
+                        System.out.println(ce + "+" + q);
+                        if (ce.equals(q) || q.equals("")) {
+
                         } else {
-                            System.out.println("我被调用了"+cellNum);
+                            ch=false;
                             break;
                         }
-                    }else {
-                        cells.add(String.valueOf(cell.getStringCellValue()));
                     }
-                    cellNum++;
-
                 }
-                System.out.println(cellNum);
-                if (cellNum == lastCellNum )
-                    list.add(cells);
-            }
+                if(ch) {
+                    cell = row.getCell(0);
+                    if (cell != null) {
+                        String code = cell.getStringCellValue();
+                        if (that == null) {
+                            that = code.split("#")[0];
+                        } else if (!code.startsWith(that)) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
 
+                    Vector cells = new Vector();
+                    for (int cellNum = 0; cellNum <= lastCellNum; cellNum++) {
+                        cell = row.getCell(cellNum);
+
+                        if (cell == null)
+                            cells.add("");
+                        else {
+                            String ce = String.valueOf(cell.getStringCellValue());
+
+                            cells.add(ce);
+
+
+                        }
+                    }
+
+                    list.add(cells);
+                }
+
+            }
+            System.out.println("一次循环");
             workbook.close();
         }
         return list;
@@ -86,25 +119,45 @@ public class ExcleUtil {
 
     }
 
-    public static void writetoExcle(String s, int sheetname, List<String> values) throws IOException {
-        File excelFile = new File(s); // 创建文件对象
+    public static void delete(TemplateJFrame.Type type, int[] columns) throws IOException {
+
+        File excelFile = new File(type + ".xls"); // 创建文件对象
         FileInputStream in = new FileInputStream(excelFile); // 文件流
         HSSFWorkbook workbook = new HSSFWorkbook(in);        //Workbook workbook = WorkbookFactory.create(is); // 这种方式 Excel2003/2007/2010都是可以处理的
 
-
-        HSSFSheet sheet = workbook.getSheetAt(sheetname);   // 遍历第三个Sheet
-
-        int last = sheet.getLastRowNum();
-        HSSFRow row1 = sheet.createRow(last + 1);
-        for (int i = 0; i < values.size(); i++) {
-            HSSFCell cell = row1.createCell(i);
-            cell.setCellValue(values.get(i));
+        HSSFSheet sheet = workbook.getSheetAt(0);   // 遍历第三个Sheet
+        for(int i : columns){
+            Row row = sheet.getRow(i);
+            Cell cell = row.getCell(0);
+            cell.setCellValue(cell.getStringCellValue()+"#");
         }
-        //将文件保存到指定的位置
 
-        FileOutputStream fos = new FileOutputStream(s);
+        FileOutputStream fos = new FileOutputStream(type + ".xls");
         workbook.write(fos);
-        System.out.println("写入成功");
+        workbook.close();
+        fos.close();
+
+
+    }
+
+    public static void change(TemplateJFrame.Type type,int []nums, HashMap<Integer,String> map) throws IOException {
+
+        File excelFile = new File(type + ".xls"); // 创建文件对象
+        FileInputStream in = new FileInputStream(excelFile); // 文件流
+        HSSFWorkbook workbook = new HSSFWorkbook(in);        //Workbook workbook = WorkbookFactory.create(is); // 这种方式 Excel2003/2007/2010都是可以处理的
+            System.out.println("开始写入");
+        HSSFSheet sheet = workbook.getSheetAt(0);   // 遍历第三个Sheet
+        for(int i : nums){
+            Row row = sheet.getRow(i);
+            for(int key:map.keySet()){
+                Cell cell = row.getCell(key);
+                cell.setCellValue(map.get(key));
+            }
+
+        }
+
+        FileOutputStream fos = new FileOutputStream(type + ".xls");
+        workbook.write(fos);
         workbook.close();
         fos.close();
 
@@ -112,12 +165,45 @@ public class ExcleUtil {
     }
 
 
-    public static void createExcle(String s) throws IOException {
-        createExcle(s, null);
+    public static void writetoExcle(TemplateJFrame.Type type, Vector<Vector> values) throws IOException {
+        File excelFile = new File(type + ".xls"); // 创建文件对象
+        FileInputStream in = new FileInputStream(excelFile); // 文件流
+        HSSFWorkbook workbook = new HSSFWorkbook(in);        //Workbook workbook = WorkbookFactory.create(is); // 这种方式 Excel2003/2007/2010都是可以处理的
+
+        HSSFSheet sheet = workbook.getSheetAt(0);   // 遍历第三个Sheet
+
+        int last = sheet.getLastRowNum() + 1;
+        System.out.println("要写入"+last);
+        for (int i = 0; i < values.size(); i++) {
+
+            Vector vector = (Vector) values.get(i);
+            HSSFRow row1 = sheet.createRow(last);
+            HSSFCell cellq = row1.createCell(0);
+            cellq.setCellValue(last - i + "#" + last);
+            last = last + 1;
+            for (int ii = 1; ii <= vector.size(); ii++) {
+                HSSFCell cell = row1.createCell(ii);
+                cell.setCellValue((String) vector.get(ii - 1));
+            }
+
+
+        }
+        //将文件保存到指定的位置
+
+        FileOutputStream fos = new FileOutputStream(type + ".xls");
+        workbook.write(fos);
+        System.out.println("写入all成功" + values.size());
+        workbook.close();
+        fos.close();
+
+
     }
 
-    public static void createExcle(String s, List<String> titles) throws IOException {
-        File file = new File(s);
+
+    public static void createExcle(TemplateJFrame.Type type) throws IOException {
+        List<String> titles = TemplateJFrame.typesselected;
+        titles.add(0, "ddd");
+        File file = new File(type.toString() + ".xls");
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -135,7 +221,6 @@ public class ExcleUtil {
             HSSFSheet sheet = workbook.createSheet("all");
 
 
-
             HSSFRow row = sheet.createRow(0);
             for (int i = 0; i < titles.size(); i++) {
 
@@ -150,11 +235,11 @@ public class ExcleUtil {
 
         //将文件保存到指定的位置
 
-        FileOutputStream fos = new FileOutputStream(s);
+        FileOutputStream fos = new FileOutputStream(type.toString() + ".xls");
         workbook.write(fos);
         System.out.println("写入成功");
         fos.close();
-
+        titles.remove(0);
 
     }
 

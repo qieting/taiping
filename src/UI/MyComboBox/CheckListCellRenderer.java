@@ -3,11 +3,7 @@ package UI.MyComboBox;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 public class CheckListCellRenderer extends JCheckBox implements ListCellRenderer,
@@ -17,8 +13,10 @@ public class CheckListCellRenderer extends JCheckBox implements ListCellRenderer
      * Constructs a default renderer object for an item
      * in a list.
      */
-    public CheckListCellRenderer() {
+    MyComboBox myComboBox;
+    public CheckListCellRenderer( MyComboBox myComboBox) {
         super();
+        this.myComboBox=myComboBox;
         if (noFocusBorder == null) {
             noFocusBorder = new EmptyBorder(1, 1, 1, 1);
         }
@@ -34,16 +32,21 @@ public class CheckListCellRenderer extends JCheckBox implements ListCellRenderer
             boolean cellHasFocus) {
         setComponentOrientation(list.getComponentOrientation());
         if (isSelected) {
-            setBackground(list.getSelectionBackground());
-            setForeground(list.getSelectionForeground());
+            setBackground(Color.WHITE);
+            setForeground(Color.RED);
         } else {
             setBackground(list.getBackground());
             setForeground(list.getForeground());
         }
         if (value instanceof CheckValue) {
-            CheckValue ckValue = (CheckValue) value;
-            this.setText(ckValue.value == null ? "" : ckValue.value.daima+ckValue.value.mingzi);
-            this.setSelected(ckValue.bolValue);
+            if(index!=-1) {
+                CheckValue ckValue = (CheckValue) value;
+                this.setText(ckValue.value == null ? "" : ckValue.value.daima + ckValue.value.mingzi);
+                this.setSelected(ckValue.bolValue);
+            }else {
+                this.setText(myComboBox.getComboid());
+                this.setSelected(true);
+            }
         }
         setEnabled(list.isEnabled());
         setFont(list.getFont());

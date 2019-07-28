@@ -3,38 +3,58 @@ package UI;
 import Type.*;
 import UI.MyComboBox.CheckValue;
 import UI.MyComboBox.MyComboBox;
-import Template.*;
+import javafx.scene.control.ComboBox;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Workbook;
 import util.ExcleUtil;
+import util.Template;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Vector;
 
 public class TemplateJFrame extends JFrame implements ActionListener {
 
-    JButton change, huisu, jili, jilu, kehu, moudle,save;
+    JButton change, huisu, jili, jilu, kehu, moudle, save;
     JButton export;
+    JTable table;
 
 
     HashMap<String, TemplateJpanel> jpanelHashMap;
-    static List<String> titles;
+    public static List<String> titles;
+    public static List<String> typesselected;
+    Type t = Type.CHANGE;
     public static int limit = 4;
 
-    public TemplateJFrame() throws Exception {
+    public enum Type {
+        CHANGE, JILI, JILU, KEHU, HUISU, ALL
+    }
+
+    public TemplateJFrame() {
         super();
-        int height = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-        this.setTitle("制表小工具");
-        this.setLayout(new MyVFlowLayout());
+        this.setTitle("制表小工具-激励模板");
+        JPanel m = new JPanel();
+        this.add(m);
+        m.setLayout(new MyVFlowLayout());
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double w = screenSize.width * 0.4;
+        this.setSize(new Dimension((int) w, (int) (screenSize.height * 0.8)));
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(getOwner());
+        this.setVisible(true);
+
+
+        //这里是topjpanel的布局
         JPanel topJPanel = new JPanel();
         change = new JButton("变动");
         huisu = new JButton("回溯");
@@ -42,18 +62,8 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         jili = new JButton("激励");
         kehu = new JButton("客户");
         export = new JButton("导出");
-        save=new JButton("保存");
-
-        moudle = new JButton("模板");
-        initMoudle();
-        change.addActionListener(this);
-        huisu.addActionListener(this);
-        jili.addActionListener(this);
-        jilu.addActionListener(this);
-        kehu.addActionListener(this);
-        export.addActionListener(this);
-        moudle.addActionListener(this::actionPerformed);
-        save.addActionListener(this::actionPerformed);
+        save = new JButton("保存");
+        moudle = new JButton("历史");
 
         topJPanel.add(change);
         topJPanel.add(huisu);
@@ -63,12 +73,44 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         topJPanel.add(save);
         topJPanel.add(export);
         topJPanel.add(moudle);
-        this.add(topJPanel);
+
+        //中间桌面布局
+        JScrollPane tablepanle = new JScrollPane();
+        table = new JTable();
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {//仅当鼠标单击时响应
+                int r = table.getSelectedRow() + 1;
+                //得到选中的行列的索引值
+                int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "确定要删除第" + r + "行对话框吗", "提示框",
+                        JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    ((DefaultTableModel) table.getModel()).removeRow(r - 1);
+                } else if (result == JOptionPane.NO_OPTION) {
+                } else if (result == JOptionPane.CANCEL_OPTION) {
+                } else {
+                }
+            }
+
+        });
+        tablepanle.setViewportView(table);
+
+
+        //列表布局
         JScrollPane jScrollPane = new JScrollPane();
-        this.add(jScrollPane);
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new MyVFlowLayout());
         jScrollPane.setViewportView(jPanel);
+
+
+        double h = screenSize.height * 0.8 - topJPanel.getHeight();
+        tablepanle.setPreferredSize(new Dimension((int) w, (int) (h * 0.2)));
+        jScrollPane.setPreferredSize(new Dimension((int) w, (int) (h * 0.65)));
+        m.add(topJPanel);
+        m.add(tablepanle);
+        m.add(jScrollPane);
+
         jpanelHashMap = new HashMap<>();
         HashMap<String, Mytype> types = TypeMannger.types;
         List<String> titles = getTypes();
@@ -136,74 +178,99 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                     }
                 });
             } else if (mytype.title.equals("渠道类型")) {
-                (templateJpanel.guize).getDocument().addDocumentListener(new DocumentListener() {
+                ((JComboBox) templateJpanel.chioce).addItemListener(new ItemListener() {
                     @Override
-                    public void insertUpdate(DocumentEvent e) {
-
-                        MyComboBox comboBox = (MyComboBox) jpanelHashMap.get("渠道小类").chioce;
+                    public void itemStateChanged(ItemEvent e) {
+                        JComboBox comboBox = (JComboBox) jpanelHashMap.get("渠道小类").chioce;
+                        String s = ((Chioce) e.getItem()).daima;
                         comboBox.removeAllItems();
-                        comboBox.addItem(new CheckValue(false, new Chioce("", "")));
-                        String s = templateJpanel.guize.getText();
-                        System.out.println("渠道大类代码为" + s);
-                        String[] daimas = s.split(",");
-                        List<Chioce> chioces = types.get("渠道小类").chioces;
-                        List<Chioce> chioces1 = types.get("渠道类型").chioces;
-                        List<String> text = new ArrayList<>();
-                        for (String daima : daimas) {
-                            for (Chioce chioce : chioces1) {
-                                if (chioce.mingzi.equals(daima)) {
-                                    text.add(chioce.daima);
-                                    break;
-                                }
-                            }
-                        }
-                        for (String daima : text) {
-                            for (Chioce chioce1 : chioces) {
-                                if (chioce1.daima.startsWith(daima)) {
-                                    CheckValue checkValue = new CheckValue();
-                                    checkValue.value = new Chioce(chioce1.daima, chioce1.mingzi);
-                                    checkValue.bolValue = false;
-                                    comboBox.addItem(checkValue);
-                                }
-                            }
-                        }
-                    }
+                        comboBox.addItem(new Chioce("", ""));
 
-                    @Override
-                    public void removeUpdate(DocumentEvent e) {
-                        MyComboBox comboBox = (MyComboBox) jpanelHashMap.get("渠道小类").chioce;
-                        comboBox.removeAllItems();
-                        comboBox.addItem(new CheckValue(false, new Chioce("", "")));
-                        String s = templateJpanel.guize.getText();
-                        System.out.println("渠道大类代码为" + s);
-                        String[] daimas = s.split(",");
                         List<Chioce> chioces = types.get("渠道小类").chioces;
-                        List<Chioce> chioces1 = types.get("渠道类型").chioces;
-                        List<String> text = new ArrayList<>();
-                        for (String daima : daimas) {
-                            for (Chioce chioce : chioces1) {
-                                if (chioce.mingzi.equals(daima)) {
-                                    text.add(chioce.daima);
-                                    break;
-                                }
-                            }
-                        }
-                        for (String daima : text) {
-                            for (Chioce chioce1 : chioces) {
-                                if (chioce1.daima.startsWith(daima)) {
-                                    CheckValue checkValue = new CheckValue();
-                                    checkValue.value = new Chioce(chioce1.daima, chioce1.mingzi);
-                                    checkValue.bolValue = false;
-                                    comboBox.addItem(checkValue);
-                                }
-                            }
-                        }
-                    }
 
-                    @Override
-                    public void changedUpdate(DocumentEvent e) {
+
+                        for (Chioce chioce1 : chioces) {
+                            if (chioce1.daima.startsWith(s)) {
+
+                                comboBox.addItem(chioce1);
+                            }
+                        }
+
                     }
                 });
+
+//                (templateJpanel.guize).
+//
+//                    getDocument().
+//
+//                    addDocumentListener(new DocumentListener() {
+//                        @Override
+//                        public void insertUpdate (DocumentEvent e){
+//
+//                            MComboBox comboBox = (MComboBox) jpanelHashMap.get("渠道小类").chioce;
+//                            comboBox.removeAllItems();
+//                            comboBox.addItem(new Chioce("", ""));
+//                            String s = templateJpanel.guize.getText();
+//                            System.out.println("渠道大类代码为" + s);
+//                            String[] daimas = s.split(",");
+//                            List<Chioce> chioces = types.get("渠道小类").chioces;
+//                            List<Chioce> chioces1 = types.get("渠道类型").chioces;
+//                            List<String> text = new ArrayList<>();
+//                            for (String daima : daimas) {
+//                                for (Chioce chioce : chioces1) {
+//                                    if (chioce.mingzi.equals(daima)) {
+//                                        text.add(chioce.daima);
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                            for (String daima : text) {
+//                                for (Chioce chioce1 : chioces) {
+//                                    if (chioce1.daima.startsWith(daima)) {
+//                                        CheckValue checkValue = new CheckValue();
+//                                        checkValue.value = new Chioce(chioce1.daima, chioce1.mingzi);
+//                                        checkValue.bolValue = false;
+//                                        comboBox.addItem(checkValue);
+//                                    }
+//                                }
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void removeUpdate (DocumentEvent e){
+//                            MyComboBox comboBox = (MyComboBox) jpanelHashMap.get("渠道小类").chioce;
+//                            comboBox.removeAllItems();
+//                            comboBox.addItem(new CheckValue(false, new Chioce("", "")));
+//                            String s = templateJpanel.guize.getText();
+//                            System.out.println("渠道大类代码为" + s);
+//                            String[] daimas = s.split(",");
+//                            List<Chioce> chioces = types.get("渠道小类").chioces;
+//                            List<Chioce> chioces1 = types.get("渠道类型").chioces;
+//                            List<String> text = new ArrayList<>();
+//                            for (String daima : daimas) {
+//                                for (Chioce chioce : chioces1) {
+//                                    if (chioce.mingzi.equals(daima)) {
+//                                        text.add(chioce.daima);
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                            for (String daima : text) {
+//                                for (Chioce chioce1 : chioces) {
+//                                    if (chioce1.daima.startsWith(daima)) {
+//                                        CheckValue checkValue = new CheckValue();
+//                                        checkValue.value = new Chioce(chioce1.daima, chioce1.mingzi);
+//                                        checkValue.bolValue = false;
+//                                        comboBox.addItem(checkValue);
+//                                    }
+//                                }
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void changedUpdate (DocumentEvent e){
+//                        }
+//                    });
             } else if (mytype.title.equals("车辆用途")) {
                 (templateJpanel.guize).getDocument().addDocumentListener(new DocumentListener() {
                     @Override
@@ -235,23 +302,25 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
-                                    chioceList.add(checkValue);
+                                    if(!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
+                                        chioceList.add(checkValue);
+                                    }
                                     break;
                                 case "04":
                                 case "10":
@@ -366,23 +435,25 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
-                                    chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
-                                    chioceList.add(checkValue);
+                                    if(!chioceList.contains(checkValue)) {
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("13", "10-20座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("14", "20-36座客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("15", "36座以上客车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("21", "2吨以下货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("22", "2-5吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("23", "5-10吨货车"));
+                                        chioceList.add(checkValue);
+                                        checkValue = new CheckValue(false, new Chioce("24", "10吨以上货车"));
+                                        chioceList.add(checkValue);
+                                    }
                                     break;
                                 case "04":
                                 case "10":
@@ -474,274 +545,170 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
                     }
                 });
-            } else if (mytype.title.equals("险种")) {
-                ((JComboBox) templateJpanel.chioce).addItemListener(new ItemListener() {
-                    @Override
-                    public void itemStateChanged(ItemEvent e) {
-                        String s = ((Chioce) e.getItem()).daima;
-                        switch ((String) s) {
-                            case "0801":
-                                limit = 4;
-                                break;
-                            case "0802":
-                                int q = ((JComboBox) jpanelHashMap.get("新旧车标志").chioce).getSelectedIndex();
-                                if (q == 0) {
-                                    limit = 100000;
-                                } else if (q == 1) {
-                                    limit = 22;
-                                } else if (q == 2) {
-                                    limit = 27;
-                                }
-                                break;
-                            default:
-                                limit = 100000;
-                        }
-                    }
-                });
-            } else if (mytype.title.equals("可用变动费用率")) {
-                (templateJpanel.chioce).addFocusListener(new FocusListener() {
-                    @Override
-                    public void focusGained(FocusEvent e) {
-
-                    }
-
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        try {
-                            int q = Integer.parseInt(((JTextField) templateJpanel.chioce).getText());
-                            int a = Integer.parseInt(((JTextField) jpanelHashMap.get("代理手续费率").chioce).getText());
-                            int b = Integer.parseInt(((JTextField) jpanelHashMap.get("月度提奖率").chioce).getText());
-                            int c = Integer.parseInt(((JTextField) jpanelHashMap.get("组织利益(分)").chioce).getText());
-                            int d = a + b + c;
-                            if (q != d) {
-                                JOptionPane.showMessageDialog(null, "可用变动费用率=代理手续费率+月度提奖率+组织利益(分)，应为：" + d, "输入错误提示", JOptionPane.ERROR_MESSAGE);
-                            }
-
-                        } catch (Exception ee) {
-                            JOptionPane.showMessageDialog(null, "可用变动费率必须为数字哦", "输入错误", JOptionPane.ERROR_MESSAGE);
-                        }
-
-
-                    }
-                });
-            } else if (mytype.title.equals("销售及服务成本")) {
-                (templateJpanel.chioce).addFocusListener(new FocusListener() {
-                    @Override
-                    public void focusGained(FocusEvent e) {
-
-                    }
-
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        try {
-                            int q = Integer.parseInt(((JTextField) templateJpanel.chioce).getText());
-                            int a = Integer.parseInt(((JTextField) jpanelHashMap.get("可用变动费用率").chioce).getText());
-                            int b = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费用1").chioce).getText());
-                            int c = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费用2").chioce).getText());
-                            int i = Integer.parseInt(((JTextField) jpanelHashMap.get("记录费用(率)").chioce).getText());
-                            int f = Integer.parseInt(((JTextField) jpanelHashMap.get("客户评分").chioce).getText());
-                            int g = Integer.parseInt(((JTextField) jpanelHashMap.get("预估增值服务费成本率").chioce).getText());
-
-                            int h = Integer.parseInt(((JTextField) jpanelHashMap.get("预估间接理赔成本率").chioce).getText());
-                            int d = a + b + c + f + g + h + i;
-                            if (q != d) {
-                                JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用+激励费用1+激励费用2+记录费用(率) +客户评分+预估增值服务费成本率+预估间接理赔成本率\n，应为：" + d, "输入错误提示", JOptionPane.ERROR_MESSAGE);
-                            }
-
-                        } catch (Exception ee) {
-                            JOptionPane.showMessageDialog(null, "销售及服务成本必须为数字哦", "输入错误", JOptionPane.ERROR_MESSAGE);
-                        }
-
-
-                    }
-                });
             }
+//            else if (mytype.title.equals("险种")) {
+//                ((JComboBox) templateJpanel.chioce).addItemListener(new ItemListener() {
+//                    @Override
+//                    public void itemStateChanged(ItemEvent e) {
+//                        String s = ((Chioce) e.getItem()).daima;
+//                        switch ((String) s) {
+//                            case "0801":
+//                                limit = 4;
+//                                break;
+//                            case "0802":
+//                                int q = ((JComboBox) jpanelHashMap.get("新旧车标志").chioce).getSelectedIndex();
+//                                if (q == 0) {
+//                                    limit = 100000;
+//                                } else if (q == 1) {
+//                                    limit = 22;
+//                                } else if (q == 2) {
+//                                    limit = 27;
+//                                }
+//                                break;
+//                            default:
+//                                limit = 100000;
+//                        }
+//                    }
+//                });
+//            }
+// else if (mytype.title.equals("可用变动费用率")) {
+//                (templateJpanel.chioce).addFocusListener(new FocusListener() {
+//                    @Override
+//                    public void focusGained(FocusEvent e) {
+//
+//                    }
+//
+//                    @Override
+//                    public void focusLost(FocusEvent e) {
+//                        try {
+//                            int q = Integer.parseInt(((JTextField) templateJpanel.chioce).getText());
+//                            int a = Integer.parseInt(((JTextField) jpanelHashMap.get("代理手续费率").chioce).getText());
+//                            int b = Integer.parseInt(((JTextField) jpanelHashMap.get("月度提奖率").chioce).getText());
+//                            int c = Integer.parseInt(((JTextField) jpanelHashMap.get("组织利益(分)").chioce).getText());
+//                            int d = a + b + c;
+//                            if (q < d) {
+//                                JOptionPane.showMessageDialog(null, "可用变动费用率>=代理手续费率+月度提奖率+组织利益(分)，应为：" + d, "输入错误提示", JOptionPane.ERROR_MESSAGE);
+//                            }
+//
+//                        } catch (Exception ee) {
+//                            JOptionPane.showMessageDialog(null, "可用变动费率必须为数字哦", "输入错误", JOptionPane.ERROR_MESSAGE);
+//                        }
+//
+//
+//                    }
+//                });
+//            }
+//            else if (mytype.title.equals("销售及服务成本")) {
+//                (templateJpanel.chioce).addFocusListener(new FocusListener() {
+//                    @Override
+//                    public void focusGained(FocusEvent e) {
+//
+//                    }
+//
+//                    @Override
+//                    public void focusLost(FocusEvent e) {
+//                        try {
+//                            int q = Integer.parseInt(((JTextField) templateJpanel.chioce).getText());
+//                            int a = Integer.parseInt(((JTextField) jpanelHashMap.get("可用变动费用率").chioce).getText());
+//                            int b = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费用1").chioce).getText());
+//                            int c = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费用2").chioce).getText());
+//                            int i = Integer.parseInt(((JTextField) jpanelHashMap.get("记录费用(率)").chioce).getText());
+//                            int f = Integer.parseInt(((JTextField) jpanelHashMap.get("客户评分").chioce).getText());
+//                            int g = Integer.parseInt(((JTextField) jpanelHashMap.get("预估增值服务费成本率").chioce).getText());
+//
+//                            int h = Integer.parseInt(((JTextField) jpanelHashMap.get("预估间接理赔成本率").chioce).getText());
+//                            int d = a + b + c + f + g + h + i;
+//                            if (q != d) {
+//                                JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用+激励费用1+激励费用2+记录费用(率) +客户评分+预估增值服务费成本率+预估间接理赔成本率\n，应为：" + d, "输入错误提示", JOptionPane.ERROR_MESSAGE);
+//                            }
+//
+//                        } catch (Exception ee) {
+//                            JOptionPane.showMessageDialog(null, "销售及服务成本必须为数字哦", "输入错误", JOptionPane.ERROR_MESSAGE);
+//                        }
+//
+//
+//                    }
+//                });
+//            }
             jpanelHashMap.put(mytype.title, templateJpanel);
             jPanel.add(templateJpanel);
         }
-
-        jScrollPane.setPreferredSize(new Dimension(700, 600));
-
-        JScrollBar Bar = null;
-
-        Bar = jScrollPane.getVerticalScrollBar();
-
+        //jScrollPane.setPreferredSize(new Dimension(200,200));
+        JScrollBar Bar = jScrollPane.getVerticalScrollBar();
         Bar.setUnitIncrement(40);
 
+        initJtable(Type.CHANGE);
+        change.addActionListener(this::actionPerformed);
+        huisu.addActionListener(this::actionPerformed);
+        jili.addActionListener(this::actionPerformed);
+        jilu.addActionListener(this::actionPerformed);
+        kehu.addActionListener(this::actionPerformed);
+        export.addActionListener(this::actionPerformed);
+        moudle.addActionListener(this::actionPerformed);
+        save.addActionListener(this::actionPerformed);
 
-        this.setBackground(Color.WHITE);
-
-        this.setBounds(200, 10, 700, (int) (height * 0.8));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(getOwner());
-        this.pack();
-        this.setResizable(false);
-        this.setVisible(true);
     }
 
-    public void initMoudle() {
-        this.setVisible(false);
-    }
-
-    static {
-        titles = new ArrayList<>();
-        titles.add("生效日期");
-        titles.add("失效日期");
-        titles.add("OA号");
-        titles.add("保费是否含税");
-        titles.add("备注");
-        titles.add("销售及服务成本");
-        titles.add("可用变动费用额");
-        titles.add("险种");
-        titles.add("新旧车标志");
-        titles.add("月度提奖率");
-        titles.add("可联动费用率");
-        titles.add("组织利益(分)");
-        titles.add("代理手续费率");
-        titles.add("可用变动费用率");
-        titles.add("组织利益(总)");
-        titles.add("保单服务费");
-        titles.add("固定绩效");
-        titles.add("代理手续费率2");
-        titles.add("代理手续费率2支付人");
-        titles.add("预估引流成本率");
-        titles.add("预估业务维护成本率");
-        titles.add("预估增值服务费成本率");
-        titles.add("预估间接理赔成本率");
-        titles.add("预估增值服务费成本率2");
-        titles.add("激励费率1");
-        titles.add("激励费额1");
-        titles.add("激励费率2");
-        titles.add("激励费额2");
-        titles.add("记录费用(率)");
-        titles.add("记录费用(额)");
-        titles.add("客户评分");
-        titles.add("政策差异化方式");
-        titles.add("费用险别");
-        titles.add("归属机构");
-        titles.add("决策单元大类");
-        titles.add("决策单元小类");
-        titles.add("决策单元代码");
-        titles.add("渠道类型");
-        titles.add("渠道小类");
-        titles.add("是否秒杀");
-        titles.add("产品组合");
-        titles.add("双保标识");
-        titles.add("业务方式");
-        titles.add("协议号");
-        titles.add("合作网点");
-        titles.add("业务分类");
-        titles.add("车损险车系分类");
-        titles.add("决策表评分值");
-        titles.add("车主年龄");
-        titles.add("车主性别");
-        titles.add("商业险精算折扣");
-        titles.add("商业险报价折扣");
-        titles.add("商业险签单折扣(自动)");
-        titles.add("折扣率(%)区间");
-        titles.add("无赔款优待系数区间");
-        titles.add("商业险不浮动原因(平台)");
-        titles.add("异地车标志");
-        titles.add("往年索赔记录");
-        titles.add("所属性质");
-        titles.add("车辆用途");
-        titles.add("车辆种类");
-        titles.add("使用性质");
-        titles.add("机动车种类");
-        titles.add("生产国别");
-        titles.add("车系代码");
-        titles.add("续保标志");
-        titles.add("拆单标志");
-        titles.add("车龄区间");
-        titles.add("贷款车标志");
-        titles.add("新车购置价");
-        titles.add("核定载质量(kg)");
-        titles.add("签单保费");
-        titles.add("起保日期");
-        titles.add("品牌名称");
-        titles.add("短期险标识");
-        titles.add("自卸车标识");
-        titles.add("交强险不浮动原因(平台)");
-        titles.add("车型新分类");
-        titles.add("平台车险分");
-        titles.add("蚂蚁车险分");
-        titles.add("商业险险别数量");
-        titles.add("三者险状态");
-        titles.add("车上人员险状态");
-        titles.add("车损险状态");
-        titles.add("机动车损失保险(IACJQL0001)状态");
-        titles.add("盗抢险状态");
-        titles.add("玻璃破碎险状态");
-        titles.add("车身划痕险状态");
-        titles.add("指定修理厂险状态");
-        titles.add("自燃险状态");
-        titles.add("新增设备险状态");
-        titles.add("发动机损失险状态");
-        titles.add("费用补偿险状态");
-        titles.add("车上货物险状态");
-        titles.add("精神损害险状态");
-        titles.add("第三方特约险状态");
-        titles.add("三者节假日翻倍险状态");
-        titles.add("附加绝对免赔率特约(IACJQL0101)状态");
-        titles.add("附加车轮单独损坏除外特约(IACJQL0201)状态");
-        titles.add("新增设备损失险(IACJQL0001)状态");
-        titles.add("操作员");
-        titles.add("寿/养老业务员");
-        titles.add("业务员");
-        titles.add("车上人员险每座保额(万元)");
-
+    public void initJtable(Type type) {
+        typesselected = Template.getTypes(type);
+        DefaultTableModel defaultTableModel = new DefaultTableModel();
+        for (String s : typesselected) {
+            defaultTableModel.addColumn(s);
+        }
+        table.setModel(defaultTableModel);
     }
 
     public static List<String> getTypes() {
+        if(titles==null)
+        titles = Template.getTypes(Type.ALL);
         return titles;
-
     }
 
 
     public void refresh() {
-
         //字体会变大  com.sun.java.swing.plaf.windows.WindowsLookAndFeel
-        String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
-        try {
-            javax.swing.UIManager.setLookAndFeel(lookAndFeel);
-            List<String> types = getTypes();
-            for (String s : types) {
-                TemplateJpanel templateJpanel = jpanelHashMap.get(s);
-                SwingUtilities.updateComponentTreeUI(templateJpanel.title);
-                SwingUtilities.updateComponentTreeUI(templateJpanel.guize);
-                SwingUtilities.updateComponentTreeUI(templateJpanel.must);
-                templateJpanel.must.setBackground(Color.WHITE);
-                // templateJpanel.must.
+//        String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+//        try {
+//            javax.swing.UIManager.setLookAndFeel(lookAndFeel);
+//            List<String> types = getTypes();
+//            for (String s : types) {
+//                TemplateJpanel templateJpanel = jpanelHashMap.get(s);
+//                SwingUtilities.updateComponentTreeUI(templateJpanel.title);
+//                SwingUtilities.updateComponentTreeUI(templateJpanel.guize);
+//                SwingUtilities.updateComponentTreeUI(templateJpanel.must);
+//                templateJpanel.must.setBackground(Color.WHITE);
+//                // templateJpanel.must.
+//
+//            }
+//
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (InstantiationException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        } catch (UnsupportedLookAndFeelException e) {
+//            e.printStackTrace();
+//        }
+        MyComboBox.init=true;
 
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
 
     }
 
     public static void main(String args[]) {
 
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
 
-        //WebLookAndFeel.install();
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         try {
@@ -753,19 +720,17 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
                     }
                 });
-            }
-        });
+
 
 
     }
 
-    public void saveAll() {
+    public void saveAll(Vector<Vector> vector) {
 
-        File file = new File("all.xls");
+        File file = new File(t.toString() + ".xls");
         if (!file.exists()) {
             try {
-                List<String> titles = getTypes();
-                ExcleUtil.createExcle("all.xls", titles);
+                ExcleUtil.createExcle(t);
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, "创建文件错误，错误属性为：" + e.getMessage(), "保存错误", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -773,59 +738,25 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         }
 
         try {
-
-            List<String> titles = getTypes();
-            List<String> values = new ArrayList<>();
-            for (int i = 0; i < titles.size(); i++) {
-                try {
-                    values.add(jpanelHashMap.get(titles.get(i)).getContent());
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    values.add(e.getMessage());
-                }
-            }
-            ExcleUtil.writetoExcle("all.xls", 0, values);
+            ExcleUtil.writetoExcle(t, vector);
             JOptionPane.showConfirmDialog(null, "保存成功", "保存成功", JOptionPane.CLOSED_OPTION);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "写入文件错误，错误属性为：" + e.getMessage(), "保存错误", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-
-//        //将文件保存到指定的位置
-//        try {
-//            FileOutputStream fos = new FileOutputStream("all.xls");
-//            workbook.write(fos);
-//            System.out.println("写入成功");
-//            fos.close();
-//            JOptionPane.showConfirmDialog(null, "保存成功","导出成功",JOptionPane.CLOSED_OPTION);
-//        } catch (IOException ea) {
-//            ea.printStackTrace();
-//        }
-    }
-
-    public static Workbook getWorkBook(File file) {
-        //获得文件名
-        Workbook wb = null;
-        FileInputStream in = null; // 文件流
-        try {
-            in = new FileInputStream(file);
-            wb = new HSSFWorkbook(in);
-            return wb;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-
-
     }
 
 
-    public void setValue(List<String> values) {
-        for (int i = 0; i < getTypes().size(); i++) {
-            jpanelHashMap.get(getTypes().get(i)).setValue(values.get(i));
+    public void setValue(List<Vector> values) {
+        for (Vector vector : values) {
+            vector.remove(0);
+            ((DefaultTableModel) table.getModel()).addRow(vector);
         }
+        if (values.size() > 0)
+            for (int i = 0; i < values.get(0).size(); i++) {
+                jpanelHashMap.get(typesselected.get(i)).setValue((String) values.get(0).get(i));
+            }
 
         this.setVisible(true);
     }
@@ -834,110 +765,193 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         JButton jButton = (JButton) e.getSource();
         String string = jButton.getText();
-        List<String> titles = null;
         switch (string) {
             case "变动":
-                titles = ChangeTemplate.initJtable();
-                break;
+                if (t == Type.CHANGE) return;
+                t = Type.CHANGE;
+                this.setTitle("制表小工具-变动模板");
+                initJtable(t);
+                return;
             case "回溯":
-                titles = HuisuTemplate.initJtable();
-                break;
+                if (t == Type.HUISU) return;
+                t = Type.HUISU;
+                this.setTitle("制表小工具-回溯模板");
+                initJtable(t);
+                return;
             case "激励":
-                titles = JiliTemplate.initJtable();
-                break;
+                if (t == Type.JILI) return;
+                t = Type.JILI;
+                this.setTitle("制表小工具-激励模板");
+                initJtable(t);
+                return;
             case "记录":
-                titles = JiluTemplate.initJtable();
-                break;
+                if (t == Type.JILU) return;
+                t = Type.JILU;
+                this.setTitle("制表小工具-记录模板");
+                initJtable(t);
+                return;
             case "客户":
-                titles = KehuTemplate.initJtable();
+                if (t == Type.KEHU) return;
+                t = Type.KEHU;
+                initJtable(t);
+                this.setTitle("制表小工具-客户模板");
+                return;
+            case "导出":
+                export();
                 break;
             case "保存":
-                saveAll();
+                save();
                 return;
-            case "模板":
-                File file = new File("all.xls");
+            case "历史":
+                File file = new File(t + ".xls");
                 if (!file.exists()) {
                     JOptionPane.showMessageDialog(null, "还没有保存任何模板呢", "显示错误", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                try {
-                    for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                        if ("Nimbus".equals(info.getName())) {
-                            javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                            break;
-                        }
-                    }
-                } catch (Exception ee) {
-                    System.out.println(ee);
-                }
+//                try {
+//                    for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                        if ("Nimbus".equals(info.getName())) {
+//                            javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                            break;
+//                        }
+//                    }
+//                } catch (Exception ee) {
+//                    System.out.println(ee);
+//                }
 
                 //WebLookAndFeel.install();
+
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                try {
-                                    MoudleJFrame templateJFrame = new MoudleJFrame(TemplateJFrame.this);
-                                    templateJFrame.refresh();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                        try {
+                            MoudleJFrame templateJFrame = new MoudleJFrame(TemplateJFrame.this, t);
+                            templateJFrame.refresh();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-                            }
-                        });
                     }
                 });
-
-
+//                MoudleJFrame templateJFrame = new MoudleJFrame(TemplateJFrame.this, t);
+//                templateJFrame.refresh();
                 this.setVisible(false);
                 return;
 
         }
-//第一步，创建一个workbook对应一个excel文件
+
+    }
+
+
+    public void save() {
+
+        String qq = ((String) ((MComboBox) jpanelHashMap.get("险种").chioce).getSelectedItem());
+        switch ((String) qq) {
+            case "0801":
+                limit = 4;
+                break;
+            case "0802":
+                int q = ((JComboBox) jpanelHashMap.get("新旧车标志").chioce).getSelectedIndex();
+                if (q == 0) {
+                    limit = 100000;
+                } else if (q == 1) {
+                    limit = 22;
+                } else if (q == 2) {
+                    limit = 27;
+                }
+                break;
+            default:
+                limit = 100000;
+        }
+
+
+        Vector<String> vector = new Vector<>();
+        for (
+                int i = 0; i < typesselected.size(); i++) {
+            String title = typesselected.get(i);
+            String s = jpanelHashMap.get(title).getContent();
+            if (s == null) {
+                JOptionPane.showMessageDialog(null, "属性错误，错误属性为：" + typesselected.get(i), "保存错误", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            vector.add(jpanelHashMap.get(title).getContent());
+
+        }
+
+
+        int q = Integer.parseInt(((JTextField) jpanelHashMap.get("可用变动费用率").chioce).getText());
+        int a = Integer.parseInt(((JTextField) jpanelHashMap.get("代理手续费率").chioce).getText());
+        int b = Integer.parseInt(((JTextField) jpanelHashMap.get("月度提奖率").chioce).getText());
+        int c = Integer.parseInt(((JTextField) jpanelHashMap.get("组织利益(分)").chioce).getText());
+        int d = a + b + c;
+        if (q < d) {
+            JOptionPane.showMessageDialog(null, "可用变动费用率>=代理手续费率+月度提奖率+组织利益(分)，应为：" + d, "输入错误提示", JOptionPane.ERROR_MESSAGE);
+        }
+        int e = Integer.parseInt(((JTextField) jpanelHashMap.get("销售及服务成本").chioce).getText());
+        int f = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费率1").chioce).getText());
+        int g = Integer.parseInt(((JTextField) jpanelHashMap.get("客户评分").chioce).getText());
+        int h = Integer.parseInt(((JTextField) jpanelHashMap.get("记录费用(率)").chioce).getText());
+
+        int i = Integer.parseInt(((JTextField) jpanelHashMap.get("预估引流成本率").chioce).getText());
+        int j = Integer.parseInt(((JTextField) jpanelHashMap.get("预估业务维护成本率").chioce).getText());
+        int k = Integer.parseInt(((JTextField) jpanelHashMap.get("预估增值服务费成本率").chioce).getText());
+        int l = Integer.parseInt(((JTextField) jpanelHashMap.get("预估间接理赔成本率").chioce).getText());
+        int z= f+g+h+i+j+k+l+q;
+        if(e!=z){
+            JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用率+激励费率1+客户评分+记录费用(率)+预估引流成本率+预估业务维护成本率+预估增值服务费成本率+预估间接理赔成本率，应为：" + z, "输入错误提示", JOptionPane.ERROR_MESSAGE);
+
+        }
+
+        DefaultTableModel defaultTableModel = (DefaultTableModel) table.getModel();
+        defaultTableModel.addRow(vector);
+
+
+    }
+
+    public void export() {
+        DefaultTableModel defaultTableModel = (DefaultTableModel) (table.getModel());
+        Vector<Vector> datas = defaultTableModel.getDataVector();
+        if (datas.size() == 0) {
+            JOptionPane.showMessageDialog(null, "错误：表格为空", "导出错误", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        //第一步，创建一个workbook对应一个excel文件
         HSSFWorkbook workbook = new HSSFWorkbook();
         //第二部，在workbook中创建一个sheet对应excel中的sheet
-        HSSFSheet sheet = workbook.createSheet(string + "模板");
+        HSSFSheet sheet = workbook.createSheet("模板");
         //第三部，在sheet表中添加表头第0行，老版本的poi对sheet的行列有限制
+
         HSSFRow row = sheet.createRow(0);
-        HSSFRow row1 = sheet.createRow(1);
-        //第四步，创建单元格，设置表头
         HashMap<String, Mytype> types = TypeMannger.types;
         HSSFCellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(HSSFColor.RED.index);
-
-
-//        HSSFFont font = workbook.createFont();
-//        font.setColor(HSSFColor.RED.index);
-//        style.setFont(font);
         style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
         HSSFCellStyle style1 = workbook.createCellStyle();
         style1.setFillForegroundColor(HSSFColor.YELLOW.index);
         style1.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 
-//        HSSFFont font1 = workbook.createFont();
-//        font1.setColor(HSSFColor.YELLOW.index);
-//        style1.setFont(font1);
-
-        for (int i = 0; i < titles.size(); i++) {
-            String title = titles.get(i);
+        for (int i = 0; i < typesselected.size(); i++) {
+            String title = typesselected.get(i);
             //第四步，创建单元格，设置表头
             HSSFCell cell = row.createCell(i);
-            if(types.get(title).must){
+            if (types.get(title).must) {
                 cell.setCellStyle(style);
-            }else {
+            } else {
                 cell.setCellStyle(style1);
             }
             cell.setCellValue(types.get(title).getShorthand());
-            cell = row1.createCell(i);
-            if (jpanelHashMap.get(title) == null)
-                System.out.println(title + "asd");
-            try {
-                cell.setCellValue(jpanelHashMap.get(title).getContent());
-            } catch (ArrayIndexOutOfBoundsException ea) {
-                JOptionPane.showMessageDialog(null, "属性错误，错误属性为：" + titles.get(i), "保存错误", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
         }
+        for (int i = 0; i < datas.size(); i++) {
+            Vector v = datas.get(i);
+            row = sheet.createRow(1 + i);
+            for (int ii = 0; ii < v.size(); ii++) {
+                HSSFCell cell = row.createCell(ii);
+                cell.setCellValue((String) v.get(ii));
+            }
+
+        }
+
+
         //将文件保存到指定的位置
         JFileChooser jfc = new JFileChooser();
 //        FileNameExtensionFilter filter = new FileNameExtensionFilter("xls");
@@ -953,11 +967,11 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         String path;
         if (file != null) {
             path = file.getAbsolutePath();
-            if(!path.endsWith(".xls")){
-                path=path+".xls";
+            if (!path.endsWith(".xls")) {
+                path = path + ".xls";
             }
-            File file1 =new File(path);
-            if(file1.exists()){
+            File file1 = new File(path);
+            if (file1.exists()) {
                 JOptionPane.showMessageDialog(null, "错误：文件名重复", "保存错误", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -969,10 +983,12 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                 JOptionPane.showConfirmDialog(null, "导出路径为" + path, "导出成功", JOptionPane.CLOSED_OPTION);
             } catch (IOException ea) {
                 JOptionPane.showMessageDialog(null, "错误：" + ea.getMessage(), "保存错误", JOptionPane.ERROR_MESSAGE);
+                return;
             }
         } else {
             JOptionPane.showMessageDialog(null, "您没有选择路径或者文件重复", "保存错误", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-
+        saveAll(datas);
     }
 }

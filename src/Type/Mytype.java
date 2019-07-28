@@ -21,36 +21,41 @@ public class Mytype {
     public List<Chioce> chioces;
     public mytupe type;
     public validation v;
-    public String  shorthand;
+    public String shorthand;
 
     public interface validation {
-        public boolean changevalidation(Object text);
+        boolean changevalidation(Object text);
     }
 
     public boolean changevalidation(Object text) {
-        String s =(String)text;
-        if(text.equals("")){
-            if(must)
+        String s = (String) text;
+        if (text.equals("")) {
+            if (must)
                 return false;
             else return true;
         }
-        if(type==mytupe.intt){
-            if( !Pattern.matches("\\d+", s)){
+        if (type == mytupe.intt) {
+            if (!Pattern.matches("\\d+", s)) {
                 return false;
             }
         }
         return v.changevalidation(text);
     }
 
-    public void setShorthand(String s){
-        this.shorthand=s;
+
+    public String getShorthand() {
+        return shorthand;
     }
-    public String getShorthand(){
-        return  shorthand==null? title:shorthand;
-    }
+
     public String getDefault() {
-        if(moren!=null&&must)
-            return  moren;
+
+        if (!must) {
+            return "";
+
+        }
+        if (moren != null) {
+            return moren;
+        }
         switch (this.type) {
             case Date:
                 if (title.equals("生效日期")) {
@@ -65,18 +70,14 @@ public class Mytype {
                     return lastDay;
                 }
             case intt:
-                if(must)
                 return "0";
-                else return  "";
             case string:
-                return "";
+                return "0";
             case dan:
             case shuang:
-                return this.chioces.get(0).daima+this.chioces.get(0).mingzi;
+                return this.chioces.get(0).daima + this.chioces.get(0).mingzi;
             default:
                 return "";
-
-
         }
     }
 
@@ -87,31 +88,33 @@ public class Mytype {
         public String moren;
         public Mytype.validation v;
         public boolean must;
-        public String  shorthand;
+        public String shorthand;
 
         public Builder() {
             this.title = null;
             this.chioces = null;
             this.type = Mytype.mytupe.string;
             this.v = null;
-            this.moren=null;
-            this.shorthand=null;
-            this.must=true;
-        }
-        public Builder setShorthand(String s){
-            this.shorthand=s;
-            return  this;
+            this.moren = null;
+            this.shorthand = null;
+            this.must = true;
         }
 
-
-        public Builder setMust(boolean b){
-            this.must=b;
-            if(!must&&chioces!=null)
-                chioces.add(0,new Chioce("",""));
+        public Builder setShorthand(String s) {
+            this.shorthand = s;
             return this;
         }
-        public Builder setMOren(String s){
-            this.moren=s;
+
+
+        public Builder setMust(boolean b) {
+            this.must = b;
+            if (!must && chioces != null)
+                chioces.add(0, new Chioce("", ""));
+            return this;
+        }
+
+        public Builder setMOren(String s) {
+            this.moren = s;
             return this;
         }
 
@@ -140,13 +143,13 @@ public class Mytype {
             mytype.type = this.type;
             mytype.chioces = this.chioces;
             mytype.v = this.v;
-            mytype.moren=this.moren;
+            mytype.moren = this.moren;
             mytype.title = this.title;
-            mytype.must=this.must;
-            if(shorthand==null){
-                mytype.shorthand=title;
-            }else {
-                mytype.shorthand=this.shorthand;
+            mytype.must = this.must;
+            if (shorthand == null) {
+                mytype.shorthand = title;
+            } else {
+                mytype.shorthand = this.shorthand;
             }
             return mytype;
         }
