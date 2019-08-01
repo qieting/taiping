@@ -53,14 +53,14 @@ public class TypeMannger {
             @Override
             public boolean changevalidation(Object text) {
                 String s = (String) text;
-                return Pattern.matches("\\d{11}", s);
+                return Pattern.matches("\\d+", s);
             }
         }).build();
         types.put(mytype.title, mytype);
 
         chioces = new ArrayList<>();
         chioces.add(new Chioce("0", ""));
-        chioces.add(new Chioce("1", ""));
+//        chioces.add(new Chioce("1", ""));
         mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(true).setTitle("保费是否含税").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
@@ -384,10 +384,10 @@ public class TypeMannger {
         chioces.add(new Chioce("22010602", "中石化（财险）"));
         chioces.add(new Chioce("22010701", "电子商务（寿险）"));
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("渠道小类").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setChioces(chioces).setMust(false).setTitle("渠道小类").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return true;
+                return  ((String)text).startsWith(TemplateJFrame.jclx);
             }
         }).build();
         types.put(mytype.title, mytype);
@@ -512,7 +512,7 @@ public class TypeMannger {
         mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setMOren("00-00").setTitle("商业险报价折扣").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return Pattern.matches("\\d{2}-\\d{2}", (String) text);
+                return Pattern.matches("\\d{1,2}-\\d{1,2}", (String) text);
 
 
             }
@@ -522,7 +522,7 @@ public class TypeMannger {
         mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setMOren("00-00").setTitle("商业险签单折扣(自动)").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return Pattern.matches("\\d{2}-\\d{2}", (String) text);
+                return Pattern.matches("\\d{1,2}-\\d{1,2}", (String) text);
 
 
             }
@@ -532,7 +532,7 @@ public class TypeMannger {
         mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setMOren("00-00").setTitle("折扣率(%)区间").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return Pattern.matches("\\d{2}-\\d{2}", (String) text);
+                return Pattern.matches("\\d{1,2}-\\d{1,2}", (String) text);
 
 
             }
@@ -543,7 +543,7 @@ public class TypeMannger {
         mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setMOren("00-00").setTitle("无赔款优待系数区间").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return Pattern.matches("\\d{2}-\\d{2}", (String) text);
+                return Pattern.matches("\\d{1,2}-\\d{1,2}", (String) text);
 
 
             }
@@ -832,7 +832,7 @@ public class TypeMannger {
         mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setMOren("0").setTitle("核定载质量(kg)").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                return Pattern.matches("\\d|[123456789]//d{1,4}|100000", (String) text);
+                return Pattern.matches("(\\d|[123456789]//d{1,4}|100000)-(\\d|[123456789]//d{1,4}|100000)", (String) text);
 
             }
         }).build();

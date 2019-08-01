@@ -28,6 +28,8 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     JButton change, huisu, jili, jilu, kehu, moudle, save;
     JButton export;
     JTable table;
+    public static String jclx = "0203";
+    int click = 0;
 
 
     HashMap<String, TemplateJpanel> jpanelHashMap;
@@ -42,7 +44,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
     public TemplateJFrame() {
         super();
-        this.setTitle("制表小工具-激励模板");
+        this.setTitle("制表小工具-变动模板");
         JPanel m = new JPanel();
         this.add(m);
         m.setLayout(new MyVFlowLayout());
@@ -76,23 +78,64 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
         //中间桌面布局
         JScrollPane tablepanle = new JScrollPane();
-        table = new JTable();
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table = new JTable(){
+            public boolean isCellEditable(int row, int column) {
 
+                    return false;
+
+            }//表格不允许被编辑
+        };
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent e) {//仅当鼠标单击时响应
                 int r = table.getSelectedRow() + 1;
-                //得到选中的行列的索引值
-                int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "确定要删除第" + r + "行对话框吗", "提示框",
-                        JOptionPane.YES_NO_OPTION);
-                if (result == JOptionPane.YES_OPTION) {
-                    ((DefaultTableModel) table.getModel()).removeRow(r - 1);
-                } else if (result == JOptionPane.NO_OPTION) {
-                } else if (result == JOptionPane.CANCEL_OPTION) {
-                } else {
-                }
-            }
 
+                if (click == 0) {
+                    click = 1;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(300);
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+                            if (click == 1) {
+                                click=0;
+                                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                                    public void run() {
+                                        try {
+                                            int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "确定要修改第" + r + "行对话框吗", "提示框",
+                                                    JOptionPane.YES_NO_OPTION);
+                                            if (result == JOptionPane.YES_OPTION) {
+                                                setOne((Vector) ((DefaultTableModel) table.getModel()).getDataVector().get(r - 1));
+                                            } else if (result == JOptionPane.NO_OPTION) {
+                                            } else if (result == JOptionPane.CANCEL_OPTION) {
+                                            } else {
+                                            }
+                                        } catch (Exception e) {
+
+                                        }
+                                    }
+
+                                });
+                            }
+                        }
+                    }).start();
+                } else {
+                    click = 0;
+                    int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "确定要删除第" + r + "行对话框吗", "提示框",
+                            JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        ((DefaultTableModel) table.getModel()).removeRow(r - 1);
+                    } else if (result == JOptionPane.NO_OPTION) {
+                    } else if (result == JOptionPane.CANCEL_OPTION) {
+                    } else {
+                    }
+                }
+
+
+            }
         });
         tablepanle.setViewportView(table);
 
@@ -181,20 +224,9 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                 ((JComboBox) templateJpanel.chioce).addItemListener(new ItemListener() {
                     @Override
                     public void itemStateChanged(ItemEvent e) {
-                        JComboBox comboBox = (JComboBox) jpanelHashMap.get("渠道小类").chioce;
+
                         String s = ((Chioce) e.getItem()).daima;
-                        comboBox.removeAllItems();
-                        comboBox.addItem(new Chioce("", ""));
-
-                        List<Chioce> chioces = types.get("渠道小类").chioces;
-
-
-                        for (Chioce chioce1 : chioces) {
-                            if (chioce1.daima.startsWith(s)) {
-
-                                comboBox.addItem(chioce1);
-                            }
-                        }
+                        jclx = s;
 
                     }
                 });
@@ -302,7 +334,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    if(!chioceList.contains(checkValue)) {
+                                    if (!chioceList.contains(checkValue)) {
                                         chioceList.add(checkValue);
                                         checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
                                         chioceList.add(checkValue);
@@ -379,7 +411,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("27", "5-10吨挂车"));
                                     chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("28", "210吨以上挂车"));
+                                    checkValue = new CheckValue(false, new Chioce("28", "10吨以上挂车"));
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("30", "特种车一"));
                                     chioceList.add(checkValue);
@@ -435,7 +467,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    if(!chioceList.contains(checkValue)) {
+                                    if (!chioceList.contains(checkValue)) {
                                         chioceList.add(checkValue);
                                         checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
                                         chioceList.add(checkValue);
@@ -512,7 +544,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("27", "5-10吨挂车"));
                                     chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("28", "210吨以上挂车"));
+                                    checkValue = new CheckValue(false, new Chioce("28", "10吨以上挂车"));
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("30", "特种车一"));
                                     chioceList.add(checkValue);
@@ -649,18 +681,20 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
     }
 
+
     public void initJtable(Type type) {
         typesselected = Template.getTypes(type);
         DefaultTableModel defaultTableModel = new DefaultTableModel();
         for (String s : typesselected) {
             defaultTableModel.addColumn(s);
         }
+
         table.setModel(defaultTableModel);
     }
 
     public static List<String> getTypes() {
-        if(titles==null)
-        titles = Template.getTypes(Type.ALL);
+        if (titles == null)
+            titles = Template.getTypes(Type.ALL);
         return titles;
     }
 
@@ -690,7 +724,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 //        } catch (UnsupportedLookAndFeelException e) {
 //            e.printStackTrace();
 //        }
-        MyComboBox.init=true;
+        MyComboBox.init = true;
 
 
     }
@@ -709,18 +743,17 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 //        }
 
 
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        try {
-                            TemplateJFrame templateJFrame = new TemplateJFrame();
-                            templateJFrame.refresh();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    TemplateJFrame templateJFrame = new TemplateJFrame();
+                    templateJFrame.refresh();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                    }
-                });
-
+            }
+        });
 
 
     }
@@ -751,6 +784,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     public void setValue(List<Vector> values) {
         for (Vector vector : values) {
             vector.remove(0);
+            vector.remove(0);
             ((DefaultTableModel) table.getModel()).addRow(vector);
         }
         if (values.size() > 0)
@@ -760,6 +794,13 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
         this.setVisible(true);
     }
+
+    public void setOne(Vector v) {
+        for (int i = 0; i < v.size(); i++) {
+            jpanelHashMap.get(typesselected.get(i)).setValue((String) v.get(i));
+        }
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -895,14 +936,73 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         int j = Integer.parseInt(((JTextField) jpanelHashMap.get("预估业务维护成本率").chioce).getText());
         int k = Integer.parseInt(((JTextField) jpanelHashMap.get("预估增值服务费成本率").chioce).getText());
         int l = Integer.parseInt(((JTextField) jpanelHashMap.get("预估间接理赔成本率").chioce).getText());
-        int z= f+g+h+i+j+k+l+q;
-        if(e!=z){
-            JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用率+激励费率1+客户评分+记录费用(率)+预估引流成本率+预估业务维护成本率+预估增值服务费成本率+预估间接理赔成本率，应为：" + z, "输入错误提示", JOptionPane.ERROR_MESSAGE);
+        int y = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费率2").chioce).getText());
+        int z = f + g + h + i + j + k + l + q + y;
+        if (e != z) {
+            JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用率+激励费率1+激励费率2+客户评分+记录费用(率)+预估引流成本率+预估业务维护成本率+预估增值服务费成本率+预估间接理赔成本率，应为：" + z, "输入错误提示", JOptionPane.ERROR_MESSAGE);
 
         }
 
+        int sele= 5;
+        switch (t) {
+            case JILI:
+
+                sele = 4;
+                break;
+            case CHANGE:
+
+                sele = 10;
+
+                break;
+            case HUISU:
+
+                sele = 5;
+                break;
+            case KEHU:
+
+                sele =1;
+                break;
+            case JILU:
+
+                sele = 2;
+                break;
+
+
+        }
+
+
         DefaultTableModel defaultTableModel = (DefaultTableModel) table.getModel();
-        defaultTableModel.addRow(vector);
+        Vector<Vector> dddd=defaultTableModel.getDataVector();
+        int ql=0;
+        for( ; ql<dddd.size(); ){
+            boolean cc=true;
+            for(int pp =0 ;pp<dddd.get(ql).size();pp++){
+                if(pp>=5&&pp<=4+sele){
+
+                }else
+                if(dddd.get(ql).get(pp).equals(vector.get(pp)) ){
+                }else{
+                    cc=false;
+                    break;
+                }
+            }
+            if(cc){
+                int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "此次数据与第" + (ql+1) + "行数据重复，确认覆盖吗", "提示框",
+                        JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    defaultTableModel.removeRow(ql);
+                    defaultTableModel.addRow(vector);
+                } else if (result == JOptionPane.NO_OPTION) {
+                } else if (result == JOptionPane.CANCEL_OPTION) {
+                } else {
+                }
+                return;
+            }
+            ql++;
+        }
+        if(ql==dddd.size()){
+            defaultTableModel.addRow(vector);
+        }
 
 
     }
@@ -914,7 +1014,11 @@ public class TemplateJFrame extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(null, "错误：表格为空", "导出错误", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
+        String filename = JOptionPane.showInputDialog(this, "请输入文件名(无需加.xls", this.getTitle().replace("制表小工具-", ""));
+        if (filename == null || filename.length() == 0) {
+            JOptionPane.showMessageDialog(null, "错误：你没有输入文件名", "导出错误", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         //第一步，创建一个workbook对应一个excel文件
         HSSFWorkbook workbook = new HSSFWorkbook();
         //第二部，在workbook中创建一个sheet对应excel中的sheet
@@ -962,25 +1066,25 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         jfc.setCurrentDirectory(fsv.getHomeDirectory());
         jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);//设置保存路径
         jfc.showDialog(new JLabel(), "选择");
-        File file = jfc.getSelectedFile();
 
+        File file = jfc.getSelectedFile();
         String path;
         if (file != null) {
             path = file.getAbsolutePath();
-            if (!path.endsWith(".xls")) {
-                path = path + ".xls";
-            }
-            File file1 = new File(path);
+
+            File file1 = new File(path + "\\" + filename + ".xls");
             if (file1.exists()) {
                 JOptionPane.showMessageDialog(null, "错误：文件名重复", "保存错误", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            System.out.println(file1.getAbsoluteFile());
             try {
-                FileOutputStream fos = new FileOutputStream(path);
+                file1.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file1.getAbsoluteFile());
                 workbook.write(fos);
                 System.out.println("写入成功");
                 fos.close();
-                JOptionPane.showConfirmDialog(null, "导出路径为" + path, "导出成功", JOptionPane.CLOSED_OPTION);
+                JOptionPane.showConfirmDialog(null, "导出路径为" + file1.getAbsolutePath(), "导出成功", JOptionPane.CLOSED_OPTION);
             } catch (IOException ea) {
                 JOptionPane.showMessageDialog(null, "错误：" + ea.getMessage(), "保存错误", JOptionPane.ERROR_MESSAGE);
                 return;

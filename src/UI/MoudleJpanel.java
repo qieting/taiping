@@ -4,6 +4,7 @@ import UI.MyComboBox.CheckListCellRenderer;
 import UI.MyComboBox.CheckValue;
 import UI.MyComboBox.MyComboBox;
 import Type.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusEvent;
@@ -14,10 +15,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MoudleJpanel extends TemplateJpanel {
 
-    public MoudleJpanel(Mytype mytype){
+    public MoudleJpanel(Mytype mytype) {
         super(mytype);
     }
 
@@ -29,6 +31,8 @@ public class MoudleJpanel extends TemplateJpanel {
             case string:
             case intt:
                 chioce = new JTextField();
+                if (mytype.title.equals("决策单元代码"))
+                    this.title.setText("决策单元代码(多数据用-分割）");
 //                chioce.addFocusListener(new FocusListener() {
 //                                            @Override
 //                                            public void focusGained(FocusEvent e) {
@@ -68,15 +72,15 @@ public class MoudleJpanel extends TemplateJpanel {
 //
 //                                            }
 //                                        }
-//                );
+//
                 break;
             case dan:
                 chioce = new MComboBox();
                 List<Chioce> chioces = mytype.chioces;
                 System.out.println(mytype.title);
                 comboBox = (JComboBox) chioce;
-                if(mytype.must)
-                    comboBox.addItem(new Chioce("",""));
+//                if(mytype.must)
+//                    comboBox.addItem(new Chioce("",""));
                 for (Chioce chioce : chioces) {
                     comboBox.addItem(chioce);
                 }
@@ -85,7 +89,7 @@ public class MoudleJpanel extends TemplateJpanel {
                     @Override
                     public void itemStateChanged(ItemEvent e) {
                         try {
-                            String q = ((Chioce)e.getItem()).mingzi;
+                            String q = ((Chioce) e.getItem()).mingzi;
 //                        comboBox
                             guize.setText(q);
                         } catch (ArrayIndexOutOfBoundsException ee) {
@@ -99,8 +103,7 @@ public class MoudleJpanel extends TemplateJpanel {
                 chioce = new MyComboBox(guize, mytype.must);
                 comboBox = (MyComboBox) chioce;
                 chioces = mytype.chioces;
-                if(mytype.must)
-                {
+                if (mytype.must) {
                     CheckValue checkValue = new CheckValue();
                     checkValue.bolValue = false;
                     checkValue.value = new Chioce("", "");
@@ -118,7 +121,7 @@ public class MoudleJpanel extends TemplateJpanel {
                         checkValue.bolValue = false;
                         comboBox.addItem(checkValue);
                     }
-                comboBox.setRenderer(new CheckListCellRenderer((MyComboBox)comboBox));
+                comboBox.setRenderer(new CheckListCellRenderer((MyComboBox) comboBox));
 
 //                if (!mytype.must) {
 //                    comboBox.setSelectedIndex(0);
@@ -139,26 +142,40 @@ public class MoudleJpanel extends TemplateJpanel {
         }
         return true;
     }
+
     public String getContent() {
 
         String s = null;
         switch (mytype.type) {
             case Date:
-                s = ((JTextField) chioce).getText();
-                if (!s.equals("")&&!validDate(s))
-                    return  null;
+                s = ((JTextField) chioce).getText().trim();
+
+                    if (!s.equals("") && !validDate(s))
+                        return null;
+
+
+
                 break;
             case string:
             case intt:
                 s = ((JTextField) chioce).getText();
-                if (!s.equals("")&&!mytype.changevalidation(s))
-                    return  null;
+                if(mytype.title.equals("决策单元代码")){
+                    System.out.println(s);
+                    if(s.equals("") ||mytype.changevalidation(s)|| Pattern.matches("(\\d{10}-)+\\d{10}",s)){
+
+                    }else {
+                        return null;
+                    }
+                }else {
+                    if (!s.equals("") && !mytype.changevalidation(s))
+                        return null;
+                }
                 break;
             case dan:
                 List<Chioce> chioces = mytype.chioces;
                 JComboBox comboBox;
                 comboBox = (JComboBox) chioce;
-                Chioce q =((Chioce)((JComboBox) chioce).getModel().getSelectedItem());
+                Chioce q = ((Chioce) ((JComboBox) chioce).getModel().getSelectedItem());
                 s = q.daima;
                 break;
             case shuang:

@@ -2,6 +2,7 @@ package UI;
 
 import UI.MyComboBox.CheckValue;
 import UI.MyComboBox.MyComboBox;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import util.ExcleUtil;
 import Type.*;
 
@@ -10,6 +11,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -104,7 +107,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    if(!chioceList.contains(checkValue)) {
+                                    if (!chioceList.contains(checkValue)) {
                                         chioceList.add(checkValue);
                                         checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
                                         chioceList.add(checkValue);
@@ -181,7 +184,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("27", "5-10吨挂车"));
                                     chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("28", "210吨以上挂车"));
+                                    checkValue = new CheckValue(false, new Chioce("28", "10吨以上挂车"));
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("30", "特种车一"));
                                     chioceList.add(checkValue);
@@ -237,7 +240,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                                 case "02":
                                 case "03":
                                     checkValue = new CheckValue(false, new Chioce("11", "6座以下客车"));
-                                    if(!chioceList.contains(checkValue)) {
+                                    if (!chioceList.contains(checkValue)) {
                                         chioceList.add(checkValue);
                                         checkValue = new CheckValue(false, new Chioce("12", "6-10座客车"));
                                         chioceList.add(checkValue);
@@ -314,7 +317,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("27", "5-10吨挂车"));
                                     chioceList.add(checkValue);
-                                    checkValue = new CheckValue(false, new Chioce("28", "210吨以上挂车"));
+                                    checkValue = new CheckValue(false, new Chioce("28", "10吨以上挂车"));
                                     chioceList.add(checkValue);
                                     checkValue = new CheckValue(false, new Chioce("30", "特种车一"));
                                     chioceList.add(checkValue);
@@ -422,28 +425,100 @@ public class MoudleJFrame extends JFrame implements ActionListener {
         JPanel tablepanle = new JPanel();
         tablepanle.setLayout(new MyVFlowLayout());
         jScrolltable.setViewportView(tablepanle);
-        table = new JTable();
+        table = new JTable() {
+            public boolean isCellEditable(int row, int column) {
+                if (column != 0)
+                    return false;
+                return true;
+            }//表格不允许被编辑
+
+            @Override
+            public Class getColumnClass(int columnIndex) {
+                if (columnIndex == 0) {
+                    return  Boolean.class;
+                } else {
+                    return super.getColumnClass(columnIndex);
+                }
+            }
+
+        };
+
+
         model = new DefaultTableModel();
 
         table.setModel(model);
+
+        model.addColumn("选择");
         model.addColumn("序号");
+        //设置第0列显示JCheckBox
+        TableColumnModel tcm = table.getColumnModel();
+        // tcm.getColumn(0).setCellRenderer();
+        tcm.getColumn(0).
+                setCellEditor(new DefaultCellEditor(new JCheckBox()));
+
+//添加标格监听事件
+//        table.addMouseListener(new
+//
+//                                       MouseAdapter() {
+//                                           public void mouseClicked(MouseEvent e) {
+//                                               if (e.getClickCount() == 1) {
+//                                                   int columnIndex = table.columnAtPoint(e.getPoint()); //获取点击的列
+//                                                   int rowIndex = table.rowAtPoint(e.getPoint()); //获取点击的行
+//                                                   System.out.println(rowIndex);
+//                                                   if (columnIndex == 0&&rowIndex==-1) {//第0列时，执行代码
+////                        if(table.getValueAt(rowIndex,columnIndex) == null){ //如果未初始化，则设置为false
+////                            table.setValueAt(false, rowIndex, columnIndex);
+////                        }
+////
+////                                                       if (((Boolean) table.getValueAt(rowIndex, columnIndex)).booleanValue()) { //原来选中
+////                                                           table.setValueAt(false, rowIndex, 0); //点击后，取消选中
+////                                                       } else {//原来未选中
+////                                                           table.setValueAt(true, rowIndex, 0);
+////                                                       }
+//                                                       System.out.println("asfasfasf");
+//                                                   }
+//
+//                                               }
+//                                           }
+//                                       });
+
         for (String s : templateJFrame.typesselected) {
             model.addColumn(s);
         }
-        tablepanle.add(table.getTableHeader());
+
+        table.getTableHeader().setDefaultRenderer(new CheckHeaderCellRenderer(table));
+           tablepanle.add(table.getTableHeader());
         tablepanle.add(table);
 
 
-        this.setBackground(Color.WHITE);
+        this.
 
-        this.setBounds(200, 100, 700, (int) (height * 0.8));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+                setBackground(Color.WHITE);
+
+        this.
+
+                setBounds(200, 100, 700, (int) (height * 0.8));
+
         setLocationRelativeTo(getOwner());
+        //setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.
+
+                addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        t.setVisible(true);
+                        MoudleJFrame.this.dispose();
+                        super.windowClosing(e);
+                    }
+                });
 
         this.pack();
 
         this.setVisible(true);
-        this.refresh();
+        this.
+
+                refresh();
+
     }
 
     public void initMoudle() {
@@ -468,29 +543,29 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
     public void refresh() {
 
-        //字体会变大  com.sun.java.swing.plaf.windows.WindowsLookAndFeel
-        String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
-        try {
-            javax.swing.UIManager.setLookAndFeel(lookAndFeel);
-            List<String> types = getTypes();
-            for (String s : types) {
-                TemplateJpanel templateJpanel = jpanelHashMap.get(s);
-                SwingUtilities.updateComponentTreeUI(templateJpanel.title);
-                SwingUtilities.updateComponentTreeUI(templateJpanel.guize);
-                SwingUtilities.updateComponentTreeUI(templateJpanel.must);
-                templateJpanel.must.setBackground(Color.WHITE);
-                // templateJpanel.must.
-
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+//        //字体会变大  com.sun.java.swing.plaf.windows.WindowsLookAndFeel
+//        String lookAndFeel = UIManager.getSystemLookAndFeelClassName();
+//        try {
+//            javax.swing.UIManager.setLookAndFeel(lookAndFeel);
+//            List<String> types = getTypes();
+//            for (String s : types) {
+//                TemplateJpanel templateJpanel = jpanelHashMap.get(s);
+//                SwingUtilities.updateComponentTreeUI(templateJpanel.title);
+//                SwingUtilities.updateComponentTreeUI(templateJpanel.guize);
+//                SwingUtilities.updateComponentTreeUI(templateJpanel.must);
+//                templateJpanel.must.setBackground(Color.WHITE);
+//                // templateJpanel.must.
+//
+//            }
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (InstantiationException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        } catch (UnsupportedLookAndFeelException e) {
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -553,6 +628,10 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                         JOptionPane.showMessageDialog(null, "属性出错：" + jpanelHashMap.get(titles.get(i)).mytype.title, "属性错误", JOptionPane.ERROR_MESSAGE);
                         return;
                     } else {
+                        if(i==3){
+                            map.put(10000,sele[i]+1+"");
+
+                        }
                         if (!s.equals(""))
                             map.put(sele[i] + 1, "" + s);
                     }
@@ -570,6 +649,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                     ;
                     for (int i = 0; i < vectors.size(); i++) {
                         Vector vector = vectors.get(i);
+                        vector.insertElementAt(false, 0);
                         model.addRow(vector);
                     }
 
@@ -592,11 +672,12 @@ public class MoudleJFrame extends JFrame implements ActionListener {
     }
 
     public void change() {
-        int[] selectedRows = table.getSelectedRows();
+
+        int[] selectedRows = getSelectedRows();
         int lenth = selectedRows.length;
         if (lenth == 0) {
-            JOptionPane.showConfirmDialog(MoudleJFrame.this, "需要先选择要删除的行哦", "提示框",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showConfirmDialog(MoudleJFrame.this, "需要先选择要修改的行哦", "提示框",
+                    JOptionPane.DEFAULT_OPTION);
             return;
         }
         int result = JOptionPane.showConfirmDialog(MoudleJFrame.this, "确定要修改选中的" + selectedRows.length + "行吗", "提示框",
@@ -611,7 +692,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
         int select[] = new int[lenth];
         for (int i = 0; i < lenth; i++) {
 
-            int qq = Integer.parseInt(((String) table.getValueAt(selectedRows[i], 0)).split("#")[1]);
+            int qq = Integer.parseInt(((String) table.getValueAt(selectedRows[i], 1)).split("#")[1]);
             select[i] = qq;
 
         }
@@ -629,9 +710,9 @@ public class MoudleJFrame extends JFrame implements ActionListener {
             e.printStackTrace();
         }
 
-        JOptionPane.showConfirmDialog(MoudleJFrame.this, "修改成功", "提示框",
+        JOptionPane.showConfirmDialog(MoudleJFrame.this, "修改成功，为保证数据同步请重新查询", "提示框",
                 JOptionPane.CLOSED_OPTION);
-
+        model.setRowCount(0);
     }
 
     public void showError(String s) {
@@ -639,8 +720,13 @@ public class MoudleJFrame extends JFrame implements ActionListener {
     }
 
     public void selected() {
-        int[] selectedRows = table.getSelectedRows();
+        int[] selectedRows = getSelectedRows();
         int lenth = selectedRows.length;
+        if(lenth==0){
+            JOptionPane.showConfirmDialog(MoudleJFrame.this, "没有选择任何选项", "提示框",
+                    JOptionPane.DEFAULT_OPTION);
+            return;
+        }
         int result = JOptionPane.showConfirmDialog(MoudleJFrame.this, "确定要返回选中的" + selectedRows.length + "行吗", "提示框",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
@@ -662,13 +748,25 @@ public class MoudleJFrame extends JFrame implements ActionListener {
         this.dispose();
     }
 
-
+    public int []  getSelectedRows(){
+        List<Integer> integers =new ArrayList<>();
+        for(int a =0;a<table.getRowCount();a++){
+            if((boolean)table.getValueAt(a,0)){
+                integers.add(a);
+            }
+        }
+        int selecteda[] =new int[integers.size()];
+        for(int q=0 ;q<selecteda.length;q++){
+            selecteda[q]=integers.get(q);
+        }
+        return selecteda;
+    }
     public void delete() {
-        int[] selectedRows = table.getSelectedRows();
+        int[] selectedRows = getSelectedRows();
         int lenth = selectedRows.length;
         if (lenth == 0) {
             JOptionPane.showConfirmDialog(MoudleJFrame.this, "没有选择任何选项", "提示框",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.DEFAULT_OPTION);
             return;
         }
         int result = JOptionPane.showConfirmDialog(MoudleJFrame.this, "确定要删除选中的" + selectedRows.length + "行吗", "提示框",
@@ -681,9 +779,9 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
 
         int select[] = new int[lenth];
-        for (int i = lenth-1; i >=0; i--) {
+        for (int i = lenth - 1; i >= 0; i--) {
 
-            int qq = Integer.parseInt(((String) table.getValueAt(selectedRows[i], 0)).split("#")[1]);
+            int qq = Integer.parseInt(((String) table.getValueAt(selectedRows[i], 1)).split("#")[1]);
             System.out.println(selectedRows[i] + "选中获得" + qq);
             select[i] = qq;
             model.removeRow(selectedRows[i]);

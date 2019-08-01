@@ -29,7 +29,9 @@ public class TemplateJpanel extends JPanel {
         this.mytype = mytype;
         this.setBackground(Color.WHITE);
         //初始化
+
         title = new JTextField(mytype.title);
+
         guize = new JTextField("");
         must = new JTextField("*");
         chioce = initChioce(mytype);
@@ -39,16 +41,16 @@ public class TemplateJpanel extends JPanel {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         double w = screenSize.width * 0.4 - 25;
         must.setSize(20, 40);
-        title.setSize((int) (w * 0.25), 40);
+        title.setSize((int) (w * 0.30), 40);
         chioce.setSize((int) (w * 0.35), 40);
-        guize.setSize((int) (w * 0.8), 40);
+        guize.setSize((int) (w * 0.50), 40);
         //是否可编辑
         must.setEnabled(false);
         title.setEnabled(false);
         guize.setEnabled(false);
 
         //设置内容
-        title.setText(mytype.title);
+
         title.setDisabledTextColor(Color.BLACK);
         guize.setDisabledTextColor(Color.BLACK);
         if (mytype.must) {

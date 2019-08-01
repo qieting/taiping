@@ -108,7 +108,7 @@ public class Mytype {
 
         public Builder setMust(boolean b) {
             this.must = b;
-            if (!must && chioces != null)
+            if ( chioces != null)
                 chioces.add(0, new Chioce("", ""));
             return this;
         }

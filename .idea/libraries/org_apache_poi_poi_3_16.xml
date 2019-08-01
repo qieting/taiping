@@ -7,6 +7,8 @@
       <root url="jar://$PROJECT_DIR$/lib/commons-collections4-4.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ideaLibSources/poi-3.16-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

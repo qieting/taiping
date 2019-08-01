@@ -63,19 +63,41 @@ public class ExcleUtil {
                 }
 
                 boolean ch=true;
+                int j =Integer.parseInt(values.get(10000));
                 for (int key : values.keySet()) {
+                    if(key==10000){
+                        continue;
+                    }
                     cell = row.getCell(key);
                     if (cell == null)
                         continue;
                     String ce = cell.getStringCellValue();
                     if (values.get(key) != null) {
-                        String q = values.get(key).trim();
-                        System.out.println(ce + "+" + q);
-                        if (ce.equals(q) || q.equals("")) {
 
-                        } else {
-                            ch=false;
-                            break;
+                        String q = values.get(key).trim();
+                        if(key==j){
+                            String s[]=q.split("-");
+                            int i;
+                            for(i=0;i<s.length;){
+                                if (ce.equals(s[i]) || s[i].equals("")) {
+                                    break;
+                                } else {
+
+                                }
+                                i++;
+                            }
+                            if(i==s.length){
+                                ch=false;
+                            }
+
+                        }else {
+                            System.out.println(ce + "+" + q);
+                            if (ce.equals(q) || q.equals("")) {
+
+                            } else {
+                                ch = false;
+                                break;
+                            }
                         }
                     }
                 }

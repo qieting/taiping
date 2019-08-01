@@ -14,7 +14,7 @@ public class Chioce {
     }
     @Override
     public String toString(){
-        return  daima+mingzi;
+        return  daima+""+mingzi;
     }
 
     @Override

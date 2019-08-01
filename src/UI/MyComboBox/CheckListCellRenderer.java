@@ -45,7 +45,9 @@ public class CheckListCellRenderer extends JCheckBox implements ListCellRenderer
                 this.setSelected(ckValue.bolValue);
             }else {
                 this.setText(myComboBox.getComboid());
-                this.setSelected(true);
+                this.setEnabled(false);
+
+                this.setSelected(false);
             }
         }
         setEnabled(list.isEnabled());
