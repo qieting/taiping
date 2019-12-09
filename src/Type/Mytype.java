@@ -35,7 +35,7 @@ public class Mytype {
             else return true;
         }
         if (type == mytupe.intt) {
-            if (!Pattern.matches("\\d+", s)) {
+            if (!Pattern.matches("\\d+(\\.\\d{1,2})?", s)) {
                 return false;
             }
         }

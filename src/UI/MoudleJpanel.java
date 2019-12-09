@@ -32,7 +32,7 @@ public class MoudleJpanel extends TemplateJpanel {
             case intt:
                 chioce = new JTextField();
                 if (mytype.title.equals("决策单元代码"))
-                    this.title.setText("决策单元代码(多数据用-分割）");
+                    this.title.setText("决策单元代码(多数据用,分割）");
 //                chioce.addFocusListener(new FocusListener() {
 //                                            @Override
 //                                            public void focusGained(FocusEvent e) {
@@ -161,7 +161,7 @@ public class MoudleJpanel extends TemplateJpanel {
                 s = ((JTextField) chioce).getText();
                 if(mytype.title.equals("决策单元代码")){
                     System.out.println(s);
-                    if(s.equals("") ||mytype.changevalidation(s)|| Pattern.matches("(\\d{10}-)+\\d{10}",s)){
+                    if(s.equals("") ||mytype.changevalidation(s)|| Pattern.matches("(\\d{10},)+\\d{10}",s)){
 
                     }else {
                         return null;

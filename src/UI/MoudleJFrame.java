@@ -482,7 +482,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 //                                           }
 //                                       });
 
-        for (String s : templateJFrame.typesselected) {
+        for (String s : templateJFrame.titles) {
             model.addColumn(s);
         }
 
@@ -595,32 +595,32 @@ public class MoudleJFrame extends JFrame implements ActionListener {
             case "查询":
                 List<String> titles = getTypes();
                 HashMap<Integer, String> map = new HashMap<>();
-                int sele[] = null;
-                switch (type) {
-                    case JILI:
-                        int q[] = {0, 1, 2, 14, 11, 12, 15, 19, 40, 38, 39};
-                        sele = q;
-                        break;
-                    case CHANGE:
-                        int sesle[] = {0, 1, 2, 22, 19, 20, 23, 26, 48, 46, 47};
-                        sele = sesle;
-
-                        break;
-                    case HUISU:
-                        int saele[] = {0, 1, 2, 15, 12, 13, 16, 19, 41, 39, 40};
-                        sele = saele;
-                        break;
-                    case KEHU:
-                        int selae[] = {0, 1, 2, 11, 8, 9, 12, 15, 37, 35, 36};
-                        sele = selae;
-                        break;
-                    case JILU:
-                        int qq[] = {0, 1, 2, 12, 9, 10, 13, 17, 39, 37, 38};
-                        sele = qq;
-                        break;
-
-
-                }
+                int sele[] =  {0, 1, 2, 34, 31, 32, 35, 39, 60, 58, 59};
+//                switch (type) {
+//                    case JILI:
+//                        int q[] = {0, 1, 2, 14, 11, 12, 15, 19, 40, 38, 39};
+//                        sele = q;
+//                        break;
+//                    case CHANGE:
+//                        int sesle[] = {0, 1, 2, 22, 19, 20, 23, 26, 48, 46, 47};
+//                        sele = sesle;
+//
+//                        break;
+//                    case HUISU:
+//                        int saele[] = {0, 1, 2, 15, 12, 13, 16, 19, 41, 39, 40};
+//                        sele = saele;
+//                        break;
+//                    case KEHU:
+//                        int selae[] = {0, 1, 2, 11, 8, 9, 12, 15, 37, 35, 36};
+//                        sele = selae;
+//                        break;
+//                    case JILU:
+//                        int qq[] = {0, 1, 2, 12, 9, 10, 13, 17, 39, 37, 38};
+//                        sele = qq;
+//                        break;
+//
+//
+//                }
                 for (int i = 0; i < titles.size(); i++) {
 
                     String s = jpanelHashMap.get(titles.get(i)).getContent();
@@ -628,10 +628,6 @@ public class MoudleJFrame extends JFrame implements ActionListener {
                         JOptionPane.showMessageDialog(null, "属性出错：" + jpanelHashMap.get(titles.get(i)).mytype.title, "属性错误", JOptionPane.ERROR_MESSAGE);
                         return;
                     } else {
-                        if(i==3){
-                            map.put(10000,sele[i]+1+"");
-
-                        }
                         if (!s.equals(""))
                             map.put(sele[i] + 1, "" + s);
                     }
@@ -640,7 +636,7 @@ public class MoudleJFrame extends JFrame implements ActionListener {
 
 
                 try {
-                    List<Vector> vectors = ExcleUtil.query(type, map);
+                    List<Vector> vectors = ExcleUtil.q(type, map);
 
                     JOptionPane.showConfirmDialog(null, "查询到" + vectors.size(), "", JOptionPane.CLOSED_OPTION);
 

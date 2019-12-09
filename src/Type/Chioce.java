@@ -14,7 +14,11 @@ public class Chioce {
     }
     @Override
     public String toString(){
+        if(daima.length()==0||mingzi.length()==0)
         return  daima+""+mingzi;
+        else{
+            return  daima+"-"+mingzi;
+        }
     }
 
     @Override

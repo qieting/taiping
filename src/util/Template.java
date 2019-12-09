@@ -31,6 +31,8 @@ public class Template {
                 titles.add("预估增值服务费成本率");
                 titles.add("预估间接理赔成本率");
                 titles.add("预估增值服务费成本率2");
+                titles.add("预估劳务成本");
+                titles.add("预估增值服务费成本率3");
                 titles.add("激励费率1");
                 titles.add("激励费额1");
                 titles.add("激励费率2");
@@ -114,7 +116,7 @@ public class Template {
                 titles.add("操作员");
                 titles.add("寿/养老业务员");
                 titles.add("业务员");
-                titles.add("车上人员险每座保额(万元)");
+
                 break;
             case JILI:
                 titles.add("生效日期");
@@ -200,7 +202,7 @@ public class Template {
                 titles.add("操作员");
                 titles.add("寿/养老业务员");
                 titles.add("业务员");
-                titles.add("车上人员险每座保额(万元)");
+
 
                 break;
             case JILU:
@@ -285,7 +287,7 @@ public class Template {
                 titles.add("操作员");
                 titles.add("寿/养老业务员");
                 titles.add("业务员");
-                titles.add("车上人员险每座保额(万元)");
+
 
                 break;
             case KEHU:
@@ -369,7 +371,7 @@ public class Template {
                 titles.add("操作员");
                 titles.add("寿/养老业务员");
                 titles.add("业务员");
-                titles.add("车上人员险每座保额(万元)");
+
                 break;
             case HUISU:
                 titles.add("生效日期");
@@ -382,6 +384,8 @@ public class Template {
                 titles.add("预估增值服务费成本率");
                 titles.add("预估间接理赔成本率");
                 titles.add("预估增值服务费成本率2");
+                titles.add("预估劳务成本");
+                titles.add("预估增值服务费成本率3");
                 titles.add("政策差异化方式");
                 titles.add("费用险别");
                 titles.add("归属机构");
@@ -456,7 +460,7 @@ public class Template {
                 titles.add("操作员");
                 titles.add("寿/养老业务员");
                 titles.add("业务员");
-                titles.add("车上人员险每座保额(万元)");
+
                 break;
             case CHANGE:
                 titles.add("生效日期");
@@ -550,9 +554,12 @@ public class Template {
                 titles.add("操作员");
                 titles.add("寿/养老业务员");
                 titles.add("业务员");
-                titles.add("车上人员险每座保额(万元)");
+
                 break;
         }
+        titles.add("车上人员险(乘客)每座保额(万元)");
+        titles.add("车上人员险(司机)每座保额(万元)");
+        titles.add("用工类型");
         return titles;
     }
 }

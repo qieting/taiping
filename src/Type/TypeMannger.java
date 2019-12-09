@@ -49,11 +49,11 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("OA号").setMOren("0").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("OA号").setMOren("0").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
-                String s = (String) text;
-                return Pattern.matches("\\d+", s);
+
+                return true;
             }
         }).build();
         types.put(mytype.title, mytype);
@@ -77,7 +77,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("销售及服务成本").setShorthand("XSJFWCB").setMOren("0").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("销售及服务成本").setShorthand("XSJFWCB").setMOren("0").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -124,7 +124,7 @@ public class TypeMannger {
                 if (text == null || text.equals(""))
                     return true;
                 try {
-                    int q = Integer.parseInt((String) text);
+                    Float q = Float.parseFloat((String) text);
                     if (q <= TemplateJFrame.limit) {
                         return true;
                     }
@@ -141,7 +141,7 @@ public class TypeMannger {
                 if (text == null || text.equals(""))
                     return true;
                 try {
-                    int q = Integer.parseInt((String) text);
+                    Float q = Float.parseFloat((String) text);
                     if (q <= TemplateJFrame.limit) {
                         return true;
                     }
@@ -680,7 +680,7 @@ public class TypeMannger {
         types.put(mytype.title, mytype);
 
         chioces = new ArrayList<>();
-        chioces.add(new Chioce("0", "旧车"));
+        chioces.add(new Chioce("O", "旧车"));
         chioces.add(new Chioce("N", "新车"));
 
         mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("新旧车标志").setV(new Mytype.validation() {
@@ -1205,7 +1205,14 @@ public class TypeMannger {
             }
         }).build();
         types.put(mytype.title, mytype);
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setTitle("车上人员险每座保额(万元)").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setTitle("车上人员险(乘客)每座保额(万元)").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(false).setTitle("车上人员险(司机)每座保额(万元)").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1213,7 +1220,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("预估引流成本率").setShorthand("YGYLCBL").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估引流成本率").setShorthand("YGYLCBL").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1221,7 +1228,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("预估增值服务费成本率").setShorthand("YGZZFWFCBL").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估增值服务费成本率").setShorthand("YGZZFWFCBL").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1229,7 +1236,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("预估业务维护成本率").setShorthand("YGYWWHCBL").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估业务维护成本率").setShorthand("YGYWWHCBL").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1237,7 +1244,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("预估间接理赔成本率").setShorthand("YGJJLPCBL").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估间接理赔成本率").setShorthand("YGJJLPCBL").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1245,7 +1252,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("预估增值服务费成本率2").setShorthand("YGZZFWFCBL2").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估增值服务费成本率2").setShorthand("YGZZFWFCBL2").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1253,7 +1260,7 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("客户评分").setShorthand("KHPF").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("客户评分").setShorthand("KHPF").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1261,43 +1268,28 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("激励费率1").setShorthand("JLFL1").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("激励费率1").setShorthand("JLFL1").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
             }
         }).build();
         types.put(mytype.title, mytype);
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("激励费额1").setShorthand("JLFE1").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("激励费额1").setShorthand("JLFE1").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
             }
         }).build();
         types.put(mytype.title, mytype);
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("激励费率2").setShorthand("JLFL2").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("激励费率2").setShorthand("JLFL2").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
             }
         }).build();
         types.put(mytype.title, mytype);
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("激励费额2").setShorthand("JLFE2").setV(new Mytype.validation() {
-            @Override
-            public boolean changevalidation(Object text) {
-                return true;
-            }
-        }).build();
-        types.put(mytype.title, mytype);
-
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("记录费用(率)").setShorthand("JLFY(L)").setV(new Mytype.validation() {
-            @Override
-            public boolean changevalidation(Object text) {
-                return true;
-            }
-        }).build();
-        types.put(mytype.title, mytype);
-        mytype = new Mytype.Builder().setType(Mytype.mytupe.string).setMust(true).setTitle("记录费用(额)").setShorthand("JLFY(E)").setV(new Mytype.validation() {
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("激励费额2").setShorthand("JLFE2").setV(new Mytype.validation() {
             @Override
             public boolean changevalidation(Object text) {
                 return true;
@@ -1305,7 +1297,64 @@ public class TypeMannger {
         }).build();
         types.put(mytype.title, mytype);
 
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("记录费用(率)").setShorthand("JLFY(L)").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("记录费用(额)").setShorthand("JLFY(E)").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
+        chioces = new ArrayList<>();
+        chioces.add(new Chioce("1", "全日制合同"));
+        chioces.add(new Chioce("1", "投保"));
 
+
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("机动车损失保险(IACJQL0001)状态").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
+
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估劳务成本").setShorthand("YGLWCB").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.intt).setMust(true).setTitle("预估增值服务费成本率3").setShorthand("YGZZFWFCBL3").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
+
+
+        chioces = new ArrayList<>();
+        chioces.add(new Chioce("1", "全日制合同"));
+        chioces.add(new Chioce("2", "非全日制合同"));
+        chioces.add(new Chioce("3", "代理制"));
+        chioces.add(new Chioce("4", "劳务外包"));
+
+
+
+        mytype = new Mytype.Builder().setType(Mytype.mytupe.dan).setChioces(chioces).setMust(false).setTitle("用工类型").setV(new Mytype.validation() {
+            @Override
+            public boolean changevalidation(Object text) {
+                return true;
+            }
+        }).build();
+        types.put(mytype.title, mytype);
     }
 
 

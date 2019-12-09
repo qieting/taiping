@@ -15,7 +15,8 @@ public class CheckValue {
 
     @Override
     public String toString(){
-        return value.daima+value.mingzi;
+
+        return value.toString();
     }
 
     public boolean equals(Object o){

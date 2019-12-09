@@ -41,7 +41,7 @@ public class CheckListCellRenderer extends JCheckBox implements ListCellRenderer
         if (value instanceof CheckValue) {
             if(index!=-1) {
                 CheckValue ckValue = (CheckValue) value;
-                this.setText(ckValue.value == null ? "" : ckValue.value.daima + ckValue.value.mingzi);
+                this.setText(ckValue.value == null ? "" : ckValue.toString());
                 this.setSelected(ckValue.bolValue);
             }else {
                 this.setText(myComboBox.getComboid());

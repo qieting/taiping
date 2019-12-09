@@ -76,6 +76,7 @@ public class MyComboBox<E> extends JComboBox implements ActionListener {
         for (int i = start; i < getItemCount(); i++) {
             CheckValue jcb = (CheckValue) getItemAt(i);
             if (jcb.bolValue) {
+
                 s = s + jcb.value.mingzi + ",";
             }
         }

@@ -13,6 +13,7 @@ import util.Template;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -25,7 +26,7 @@ import java.util.Vector;
 
 public class TemplateJFrame extends JFrame implements ActionListener {
 
-    JButton change, huisu, jili, jilu, kehu, moudle, save;
+    JButton change, huisu, jili, jilu, kehu, moudle, save, in;
     JButton export;
     JTable table;
     public static String jclx = "0203";
@@ -44,7 +45,8 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
     public TemplateJFrame() {
         super();
-        this.setTitle("制表小工具-变动模板");
+
+        this.setTitle("制表小工具- 变动模板");
         JPanel m = new JPanel();
         this.add(m);
         m.setLayout(new MyVFlowLayout());
@@ -66,7 +68,9 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         export = new JButton("导出");
         save = new JButton("保存");
         moudle = new JButton("历史");
-
+        in = new JButton("导入");
+        in.addActionListener(this::actionPerformed);
+        change.setBackground(Color.red);
         topJPanel.add(change);
         topJPanel.add(huisu);
         topJPanel.add(jili);
@@ -74,14 +78,15 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         topJPanel.add(kehu);
         topJPanel.add(save);
         topJPanel.add(export);
+        topJPanel.add(in);
         topJPanel.add(moudle);
-
+        typesselected = Template.getTypes(t);
         //中间桌面布局
         JScrollPane tablepanle = new JScrollPane();
-        table = new JTable(){
+        table = new JTable() {
             public boolean isCellEditable(int row, int column) {
 
-                    return false;
+                return false;
 
             }//表格不允许被编辑
         };
@@ -101,7 +106,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                                 e1.printStackTrace();
                             }
                             if (click == 1) {
-                                click=0;
+                                click = 0;
                                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                                     public void run() {
                                         try {
@@ -156,6 +161,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
         jpanelHashMap = new HashMap<>();
         HashMap<String, Mytype> types = TypeMannger.types;
+        titles = Template.getTypes(Type.ALL);
         List<String> titles = getTypes();
         for (String s : titles) {
             Mytype mytype = types.get(s);
@@ -310,6 +316,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
                         MyComboBox comboBox = (MyComboBox) jpanelHashMap.get("车辆种类").chioce;
                         comboBox.removeAllItems();
+                        MyComboBox.init = false;
                         comboBox.addItem(new CheckValue(false, new Chioce("", "")));
                         String s = templateJpanel.guize.getText();
                         System.out.println("车辆种类代码为" + s);
@@ -437,11 +444,13 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                         for (CheckValue checkValue : chioceList) {
                             comboBox.addItem(checkValue);
                         }
+                        MyComboBox.init = true;
                     }
 
                     @Override
                     public void removeUpdate(DocumentEvent e) {
                         MyComboBox comboBox = (MyComboBox) jpanelHashMap.get("车辆种类").chioce;
+                        MyComboBox.init = false;
                         comboBox.removeAllItems();
                         comboBox.addItem(new CheckValue(false, new Chioce("", "")));
                         String s = templateJpanel.guize.getText();
@@ -570,6 +579,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
                         for (CheckValue checkValue : chioceList) {
                             comboBox.addItem(checkValue);
                         }
+                        MyComboBox.init = true;
                     }
 
                     @Override
@@ -669,7 +679,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         JScrollBar Bar = jScrollPane.getVerticalScrollBar();
         Bar.setUnitIncrement(40);
 
-        initJtable(Type.CHANGE);
+        initJtable();
         change.addActionListener(this::actionPerformed);
         huisu.addActionListener(this::actionPerformed);
         jili.addActionListener(this::actionPerformed);
@@ -682,10 +692,10 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     }
 
 
-    public void initJtable(Type type) {
-        typesselected = Template.getTypes(type);
+    public void initJtable() {
+
         DefaultTableModel defaultTableModel = new DefaultTableModel();
-        for (String s : typesselected) {
+        for (String s : titles) {
             defaultTableModel.addColumn(s);
         }
 
@@ -693,8 +703,6 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     }
 
     public static List<String> getTypes() {
-        if (titles == null)
-            titles = Template.getTypes(Type.ALL);
         return titles;
     }
 
@@ -789,7 +797,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         }
         if (values.size() > 0)
             for (int i = 0; i < values.get(0).size(); i++) {
-                jpanelHashMap.get(typesselected.get(i)).setValue((String) values.get(0).get(i));
+                jpanelHashMap.get(titles.get(i)).setValue((String) values.get(0).get(i));
             }
 
         this.setVisible(true);
@@ -797,56 +805,155 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
     public void setOne(Vector v) {
         for (int i = 0; i < v.size(); i++) {
-            jpanelHashMap.get(typesselected.get(i)).setValue((String) v.get(i));
+            jpanelHashMap.get(titles.get(i)).setValue((String) v.get(i));
         }
     }
 
+    public JButton getJButton(Type t) {
+        switch (t) {
+            case CHANGE:
+                return change;
+
+            case JILI:
+                return jili;
+
+            case HUISU:
+                return huisu;
+
+            case KEHU:
+                return kehu;
+
+            case JILU:
+                return jilu;
+
+        }
+        return null;
+    }
+
+    public void ininin() {
+
+        //将文件保存到指定的位置
+        JFileChooser jfc = new JFileChooser();
+//        FileNameExtensionFilter filter = new FileNameExtensionFilter("xls");
+//       // 设置文件类型
+//        jfc.setFileFilter(filter);
+        FileSystemView fsv = FileSystemView.getFileSystemView();  //注意了，这里重要的一句//得到桌面路径
+        jfc.setCurrentDirectory(fsv.getHomeDirectory());
+        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);//设置保存路径
+        jfc.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                if(f.getName().endsWith(".xls")||f.isDirectory())
+                    return true;
+                return false;
+            }
+
+            @Override
+            public String getDescription() {
+                return null;
+            }
+        });
+        jfc.showDialog(new JLabel(), "选择");
+
+        File file = jfc.getSelectedFile();
+        String path;
+        if (file != null) {
+            path = file.getAbsolutePath();
+            if (!path.endsWith(".xls")) {
+                JOptionPane.showMessageDialog(null, "文件格式错误", "导入错误", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            try {
+                List<Vector> cells = ExcleUtil.queryin(t, path);
+                for (Vector vector : cells) {
+                    Vector vect = new Vector();
+                    int qewq = 0;
+                    for (int i = 0; i < titles.size(); i++) {
+                        if (typesselected.contains(titles.get(i))) {
+                            vect.add(vector.get(qewq));
+                            qewq++;
+                        } else {
+
+                            vect.add(TypeMannger.types.get(titles.get(i)).getDefault());
+                        }
+
+                    }
+                    ((DefaultTableModel) table.getModel()).addRow(vect);
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "导入发生异常错误" + e.getMessage(), "导入错误", JOptionPane.ERROR_MESSAGE);
+            }
+
+
+        } else {
+
+            JOptionPane.showMessageDialog(null, "您没有选择路径", "导入错误", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         JButton jButton = (JButton) e.getSource();
         String string = jButton.getText();
+
         switch (string) {
             case "变动":
+
                 if (t == Type.CHANGE) return;
+                getJButton(t).setBackground(null);
+
                 t = Type.CHANGE;
                 this.setTitle("制表小工具-变动模板");
-                initJtable(t);
-                return;
+
+                break;
             case "回溯":
+
                 if (t == Type.HUISU) return;
+                getJButton(t).setBackground(null);
                 t = Type.HUISU;
+
                 this.setTitle("制表小工具-回溯模板");
-                initJtable(t);
-                return;
+
+                break;
             case "激励":
+
                 if (t == Type.JILI) return;
+                getJButton(t).setBackground(null);
                 t = Type.JILI;
+
                 this.setTitle("制表小工具-激励模板");
-                initJtable(t);
-                return;
+
+                break;
             case "记录":
                 if (t == Type.JILU) return;
+                getJButton(t).setBackground(null);
                 t = Type.JILU;
+
                 this.setTitle("制表小工具-记录模板");
-                initJtable(t);
-                return;
+
+                break;
             case "客户":
                 if (t == Type.KEHU) return;
+                getJButton(t).setBackground(null);
                 t = Type.KEHU;
-                initJtable(t);
+
                 this.setTitle("制表小工具-客户模板");
-                return;
+                break;
             case "导出":
                 export();
                 break;
+            case "导入":
+                ininin();
+                break;
             case "保存":
                 save();
-                return;
+                break;
             case "历史":
                 File file = new File(t + ".xls");
                 if (!file.exists()) {
                     JOptionPane.showMessageDialog(null, "还没有保存任何模板呢", "显示错误", JOptionPane.ERROR_MESSAGE);
+                    getJButton(t).setBackground(null);
                     return;
                 }
 //                try {
@@ -876,10 +983,12 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 //                MoudleJFrame templateJFrame = new MoudleJFrame(TemplateJFrame.this, t);
 //                templateJFrame.refresh();
                 this.setVisible(false);
+                getJButton(t).setBackground(null);
                 return;
 
         }
-
+        typesselected = Template.getTypes(t);
+        getJButton(t).setBackground(Color.red);
     }
 
 
@@ -906,12 +1015,11 @@ public class TemplateJFrame extends JFrame implements ActionListener {
 
 
         Vector<String> vector = new Vector<>();
-        for (
-                int i = 0; i < typesselected.size(); i++) {
-            String title = typesselected.get(i);
+        for (int i = 0; i < titles.size(); i++) {
+            String title = titles.get(i);
             String s = jpanelHashMap.get(title).getContent();
             if (s == null) {
-                JOptionPane.showMessageDialog(null, "属性错误，错误属性为：" + typesselected.get(i), "保存错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "属性错误，错误属性为：" + titles.get(i), "保存错误", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             vector.add(jpanelHashMap.get(title).getContent());
@@ -919,75 +1027,78 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         }
 
 
-        int q = Integer.parseInt(((JTextField) jpanelHashMap.get("可用变动费用率").chioce).getText());
-        int a = Integer.parseInt(((JTextField) jpanelHashMap.get("代理手续费率").chioce).getText());
-        int b = Integer.parseInt(((JTextField) jpanelHashMap.get("月度提奖率").chioce).getText());
-        int c = Integer.parseInt(((JTextField) jpanelHashMap.get("组织利益(分)").chioce).getText());
-        int d = a + b + c;
+        float q = Float.parseFloat(((JTextField) jpanelHashMap.get("可用变动费用率").chioce).getText());
+        float a = Float.parseFloat(((JTextField) jpanelHashMap.get("代理手续费率").chioce).getText());
+        float b = Float.parseFloat(((JTextField) jpanelHashMap.get("月度提奖率").chioce).getText());
+        float c = Float.parseFloat(((JTextField) jpanelHashMap.get("组织利益(分)").chioce).getText());
+        float d = a + b + c;
         if (q < d) {
             JOptionPane.showMessageDialog(null, "可用变动费用率>=代理手续费率+月度提奖率+组织利益(分)，应为：" + d, "输入错误提示", JOptionPane.ERROR_MESSAGE);
         }
-        int e = Integer.parseInt(((JTextField) jpanelHashMap.get("销售及服务成本").chioce).getText());
-        int f = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费率1").chioce).getText());
-        int g = Integer.parseInt(((JTextField) jpanelHashMap.get("客户评分").chioce).getText());
-        int h = Integer.parseInt(((JTextField) jpanelHashMap.get("记录费用(率)").chioce).getText());
+        float e = Float.parseFloat(((JTextField) jpanelHashMap.get("销售及服务成本").chioce).getText());
+        float f = Float.parseFloat(((JTextField) jpanelHashMap.get("激励费率1").chioce).getText());
+        float g = Float.parseFloat(((JTextField) jpanelHashMap.get("客户评分").chioce).getText());
+        float h = Float.parseFloat(((JTextField) jpanelHashMap.get("记录费用(率)").chioce).getText());
 
-        int i = Integer.parseInt(((JTextField) jpanelHashMap.get("预估引流成本率").chioce).getText());
-        int j = Integer.parseInt(((JTextField) jpanelHashMap.get("预估业务维护成本率").chioce).getText());
-        int k = Integer.parseInt(((JTextField) jpanelHashMap.get("预估增值服务费成本率").chioce).getText());
-        int l = Integer.parseInt(((JTextField) jpanelHashMap.get("预估间接理赔成本率").chioce).getText());
-        int y = Integer.parseInt(((JTextField) jpanelHashMap.get("激励费率2").chioce).getText());
-        int z = f + g + h + i + j + k + l + q + y;
+        float i = Float.parseFloat(((JTextField) jpanelHashMap.get("预估引流成本率").chioce).getText());
+        float j = Float.parseFloat(((JTextField) jpanelHashMap.get("预估业务维护成本率").chioce).getText());
+        float k = Float.parseFloat(((JTextField) jpanelHashMap.get("预估增值服务费成本率").chioce).getText());
+        float l = Float.parseFloat(((JTextField) jpanelHashMap.get("预估间接理赔成本率").chioce).getText());
+        float y = Float.parseFloat(((JTextField) jpanelHashMap.get("激励费率2").chioce).getText());
+        float r = Float.parseFloat(((JTextField) jpanelHashMap.get("预估增值服务费成本率2").chioce).getText());
+        float qw = Float.parseFloat(((JTextField) jpanelHashMap.get("预估劳务成本").chioce).getText());
+        float rs = Float.parseFloat(((JTextField) jpanelHashMap.get("预估增值服务费成本率3").chioce).getText());
+        float z = f + g + h + i + j + k + l + q + y+r+qw
+                +rs;
         if (e != z) {
-            JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用率+激励费率1+激励费率2+客户评分+记录费用(率)+预估引流成本率+预估业务维护成本率+预估增值服务费成本率+预估间接理赔成本率，应为：" + z, "输入错误提示", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "销售及服务成本=可用变动费用率+激励费率1+激励费率2+客户评分+记录费用(率)+预估引流成本率+预估业务维护成本率+预估增值服务费成本率+预估间接理赔成本率+预估增值服务费成本率2+预估劳务成本+预估增值服务费非成本率3，应为：" + z, "输入错误提示", JOptionPane.ERROR_MESSAGE);
 
         }
 
-        int sele= 5;
-        switch (t) {
-            case JILI:
-
-                sele = 4;
-                break;
-            case CHANGE:
-
-                sele = 10;
-
-                break;
-            case HUISU:
-
-                sele = 5;
-                break;
-            case KEHU:
-
-                sele =1;
-                break;
-            case JILU:
-
-                sele = 2;
-                break;
-
-
-        }
+//        int sele= 5;
+//        switch (t) {
+//            case JILI:
+//
+//                sele = 4;
+//                break;
+//            case CHANGE:
+//
+//                sele = 10;
+//
+//                break;
+//            case HUISU:
+//
+//                sele = 5;
+//                break;
+//            case KEHU:
+//
+//                sele =1;
+//                break;
+//            case JILU:
+//
+//                sele = 2;
+//                break;
+//
+//
+//        }
 
 
         DefaultTableModel defaultTableModel = (DefaultTableModel) table.getModel();
-        Vector<Vector> dddd=defaultTableModel.getDataVector();
-        int ql=0;
-        for( ; ql<dddd.size(); ){
-            boolean cc=true;
-            for(int pp =0 ;pp<dddd.get(ql).size();pp++){
-                if(pp>=5&&pp<=4+sele){
+        Vector<Vector> dddd = defaultTableModel.getDataVector();
+        int ql = 0;
+        for (; ql < dddd.size(); ) {
+            boolean cc = true;
+            for (int pp = 0; pp < dddd.get(ql).size(); pp++) {
+                if (pp >= 5 && pp <= 28) {
 
-                }else
-                if(dddd.get(ql).get(pp).equals(vector.get(pp)) ){
-                }else{
-                    cc=false;
+                } else if (dddd.get(ql).get(pp).equals(vector.get(pp))) {
+                } else {
+                    cc = false;
                     break;
                 }
             }
-            if(cc){
-                int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "此次数据与第" + (ql+1) + "行数据重复，确认覆盖吗", "提示框",
+            if (cc) {
+                int result = JOptionPane.showConfirmDialog(TemplateJFrame.this, "此次数据与第" + (ql + 1) + "行数据重复，确认覆盖吗", "提示框",
                         JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
                     defaultTableModel.removeRow(ql);
@@ -1000,7 +1111,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
             }
             ql++;
         }
-        if(ql==dddd.size()){
+        if (ql == dddd.size()) {
             defaultTableModel.addRow(vector);
         }
 
@@ -1008,6 +1119,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
     }
 
     public void export() {
+
         DefaultTableModel defaultTableModel = (DefaultTableModel) (table.getModel());
         Vector<Vector> datas = defaultTableModel.getDataVector();
         if (datas.size() == 0) {
@@ -1034,6 +1146,7 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         style1.setFillForegroundColor(HSSFColor.YELLOW.index);
         style1.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 
+
         for (int i = 0; i < typesselected.size(); i++) {
             String title = typesselected.get(i);
             //第四步，创建单元格，设置表头
@@ -1048,9 +1161,17 @@ public class TemplateJFrame extends JFrame implements ActionListener {
         for (int i = 0; i < datas.size(); i++) {
             Vector v = datas.get(i);
             row = sheet.createRow(1 + i);
-            for (int ii = 0; ii < v.size(); ii++) {
-                HSSFCell cell = row.createCell(ii);
-                cell.setCellValue((String) v.get(ii));
+            int iii = 0;
+            for (int ii = 0; ii < titles.size(); ii++) {
+
+                if (titles.get(ii).equals(typesselected.get(iii))) {
+
+                    HSSFCell cell = row.createCell(iii);
+                    cell.setCellValue((String) v.get(ii));
+                    iii++;
+                }
+
+
             }
 
         }
